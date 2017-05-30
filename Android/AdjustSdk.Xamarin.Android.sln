@@ -5,6 +5,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdjustSdk.Xamarin.Android",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Example", "Example\Example.csproj", "{3A287EDA-6088-4365-A856-01EFA9B2E4E7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdjustTesting.Xamarin.Android", "AdjustTesting.Xamarin.Android\AdjustTesting.Xamarin.Android.csproj", "{C601C570-C161-467F-B835-25A993D5E7C7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Example_ci", "Example_ci\Example_ci.csproj", "{B0FB780C-0260-422B-A97A-0F85B1DF8682}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,5 +23,13 @@ Global
 		{3A287EDA-6088-4365-A856-01EFA9B2E4E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3A287EDA-6088-4365-A856-01EFA9B2E4E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3A287EDA-6088-4365-A856-01EFA9B2E4E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C601C570-C161-467F-B835-25A993D5E7C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C601C570-C161-467F-B835-25A993D5E7C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C601C570-C161-467F-B835-25A993D5E7C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C601C570-C161-467F-B835-25A993D5E7C7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B0FB780C-0260-422B-A97A-0F85B1DF8682}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0FB780C-0260-422B-A97A-0F85B1DF8682}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B0FB780C-0260-422B-A97A-0F85B1DF8682}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B0FB780C-0260-422B-A97A-0F85B1DF8682}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
