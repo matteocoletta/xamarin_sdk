@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections.Generic;
 using Com.Adjust.Testlibrary;
 using Android.Util;
@@ -50,6 +50,8 @@ namespace Example_ci
                     case "teardown": teardown(paramsDict); break;
                     case "openDeeplink": openDeeplink(paramsDict); break;
                     case "sendReferrer": sendReferrer(paramsDict); break;
+                    case "testBegin": testBegin(paramsDict); break;
+                    case "testEnd": testEnd(paramsDict); break;
                 }
             }
             catch (Java.Lang.Exception ex)
@@ -62,7 +64,7 @@ namespace Example_ci
         {
             if (paramsDict.ContainsKey("basePath"))
             {
-                this.basePath = paramsDict["basePath"][0];
+                this.basePath = getFirstParameterValue(paramsDict, "basePath");
             }
         }
 
@@ -71,7 +73,7 @@ namespace Example_ci
             string configName = null;
             if (paramsDict.ContainsKey("configName"))
             {
-                configName = paramsDict["configName"][0];
+                configName = getFirstParameterValue(paramsDict, "configName");
             }
             else
             {
@@ -85,8 +87,8 @@ namespace Example_ci
             }
             else
             {
-                string environment = paramsDict["environment"][0];
-                string appToken = paramsDict["appToken"][0];
+                string environment = getFirstParameterValue(paramsDict, "environment");
+                string appToken = getFirstParameterValue(paramsDict, "appToken");
                 Context context = this.context;
                 if (paramsDict.ContainsKey("context") && "null".Equals(paramsDict["context"]))
                 {
@@ -99,7 +101,7 @@ namespace Example_ci
 
             if (paramsDict.ContainsKey("logLevel"))
             {
-                string logLevelS = paramsDict["logLevel"][0];
+                string logLevelS = getFirstParameterValue(paramsDict, "logLevel");
                 LogLevel logLevel = null;
 
                 switch (logLevelS)
@@ -132,41 +134,41 @@ namespace Example_ci
 
             if (paramsDict.ContainsKey("defaultTracker"))
             {
-                string defaultTracker = paramsDict["defaultTracker"][0];
+                string defaultTracker = getFirstParameterValue(paramsDict, "defaultTracker");
                 adjustConfig.SetDefaultTracker(defaultTracker);
             }
 
             if (paramsDict.ContainsKey("delayStart"))
             {
-                string delayStartS = paramsDict["delayStart"][0];
+                string delayStartS = getFirstParameterValue(paramsDict, "delayStart");
                 double delayStart = Double.Parse(delayStartS);
                 adjustConfig.SetDelayStart(delayStart);
             }
 
             if (paramsDict.ContainsKey("deviceKnown"))
             {
-                string deviceKnownS = paramsDict["deviceKnown"][0];
+                string deviceKnownS = getFirstParameterValue(paramsDict, "deviceKnown");
                 bool deviceKnown = "true".Equals(deviceKnownS);
                 adjustConfig.SetDeviceKnown(deviceKnown);
             }
 
             if (paramsDict.ContainsKey("eventBufferingEnabled"))
             {
-                string eventBufferingEnabledS = paramsDict["eventBufferingEnabled"][0];
+                string eventBufferingEnabledS = getFirstParameterValue(paramsDict, "eventBufferingEnabled");
                 var eventBufferingEnabled = "true".Equals(eventBufferingEnabledS);
                 adjustConfig.SetEventBufferingEnabled((Java.Lang.Boolean)eventBufferingEnabled);
             }
 
             if (paramsDict.ContainsKey("sendInBackground"))
             {
-                string sendInBackgroundS = paramsDict["sendInBackground"][0];
+                string sendInBackgroundS = getFirstParameterValue(paramsDict, "sendInBackground");
                 var sendInBackground = "true".Equals(sendInBackgroundS);
                 adjustConfig.SetSendInBackground(sendInBackground);
             }
 
             if (paramsDict.ContainsKey("userAgent"))
             {
-                string userAgent = paramsDict["userAgent"][0];
+                string userAgent = getFirstParameterValue(paramsDict, "userAgent");
                 adjustConfig.SetUserAgent(userAgent);
             }
             // XXX add listeners
@@ -178,7 +180,7 @@ namespace Example_ci
             string configName = null;
             if (paramsDict.ContainsKey("configName"))
             {
-                configName = paramsDict["configName"][0];
+                configName = getFirstParameterValue(paramsDict, "configName");
             }
             else
             {
@@ -196,7 +198,7 @@ namespace Example_ci
             string eventName = null;
             if (paramsDict.ContainsKey("eventName"))
             {
-                eventName = paramsDict["eventName"][0];
+                eventName = getFirstParameterValue(paramsDict, "eventName");
             }
             else
             {
@@ -210,7 +212,7 @@ namespace Example_ci
             }
             else
             {
-                string eventToken = paramsDict["eventToken"][0];
+                string eventToken = getFirstParameterValue(paramsDict, "eventToken");
                 adjustEvent = new AdjustEvent(eventToken);
                 savedInstances.Add(eventName, adjustEvent);
             }
@@ -251,7 +253,7 @@ namespace Example_ci
 
             if (paramsDict.ContainsKey("orderId"))
             {
-                string orderId = paramsDict["orderId"][0];
+                string orderId = getFirstParameterValue(paramsDict, "orderId");
                 adjustEvent.SetOrderId(orderId);
             }
         }
@@ -262,7 +264,7 @@ namespace Example_ci
             string eventName = null;
             if (paramsDict.ContainsKey("eventName"))
             {
-                eventName = paramsDict["eventName"][0];
+                eventName = getFirstParameterValue(paramsDict, "eventName");
             }
             else
             {
@@ -274,7 +276,7 @@ namespace Example_ci
 
         private void setReferrer(IDictionary<string, IList<string>> paramsDict)
         {
-            string referrer = paramsDict["referrer"][0];
+            string referrer = getFirstParameterValue(paramsDict, "referrer");
             Adjust.SetReferrer(referrer);
         }
 
@@ -290,13 +292,13 @@ namespace Example_ci
 
         private void setEnabled(IDictionary<string, IList<string>> paramsDict)
         {
-            Boolean enabled = Boolean.Parse(paramsDict["enabled"][0]);
+            Boolean enabled = Boolean.Parse(getFirstParameterValue(paramsDict, "enabled"));
             Adjust.Enabled = enabled;
         }
 
         private void setOfflineMode(IDictionary<string, IList<string>> paramsDict)
         {
-            Boolean enabled = Boolean.Parse(paramsDict["enabled"][0]);
+            Boolean enabled = Boolean.Parse(getFirstParameterValue(paramsDict, "enabled"));
             Adjust.SetOfflineMode(enabled);
         }
 
@@ -307,35 +309,57 @@ namespace Example_ci
 
         private void addSessionCallbackParameter(IDictionary<string, IList<string>> paramsDict)
         {
-            foreach (IList<string> keyValuePairs in paramsDict.Values)
+            if (paramsDict.ContainsKey("KeyValue"))
             {
-                string key = keyValuePairs[0];
-                string value = keyValuePairs[1];
-                Adjust.AddSessionCallbackParameter(key, value);
+                var list = paramsDict["KeyValue"];
+                for (var i = 0; i < list.Count; i = i + 2)
+                {
+                    string key = list[i];
+                    string value = list[i + 1];
+                    Adjust.AddSessionCallbackParameter(key, value);
+                }
             }
         }
 
         private void addSessionPartnerParameter(IDictionary<string, IList<string>> paramsDict)
         {
-            foreach (IList<string> keyValuePairs in paramsDict.Values)
+            if (paramsDict.ContainsKey("KeyValue"))
             {
-                string key = keyValuePairs[0];
-                string value = keyValuePairs[1];
-                Adjust.AddSessionPartnerParameter(key, value);
+                var list = paramsDict["KeyValue"];
+                for (var i = 0; i < list.Count; i = i + 2)
+                {
+                    string key = list[i];
+                    string value = list[i + 1];
+                    Adjust.AddSessionPartnerParameter(key, value);
+                }
             }
-        }
+		}
 
         private void removeSessionCallbackParameter(IDictionary<string, IList<string>> paramsDict)
         {
-            string key = paramsDict["key"][0];
-            Adjust.RemoveSessionCallbackParameter(key);
+            if (paramsDict.ContainsKey("Key"))
+            {
+				var list = paramsDict["Key"];
+                for (var i = 0; i < list.Count; i++)
+                {
+                    string key = list[i];
+                    Adjust.RemoveSessionCallbackParameter(key);
+                }
+            }
         }
 
         private void removeSessionPartnerParameter(IDictionary<string, IList<string>> paramsDict)
         {
-            string key = paramsDict["key"][0];
-            Adjust.RemoveSessionPartnerParameter(key);
-        }
+			if (paramsDict.ContainsKey("Key"))
+			{
+				var list = paramsDict["Key"];
+				for (var i = 0; i < list.Count; i++)
+				{
+					string key = list[i];
+					Adjust.RemoveSessionPartnerParameter(key);
+				}
+			}
+		}
 
         private void resetSessionCallbackParameters(IDictionary<string, IList<string>> paramsDict)
         {
@@ -349,13 +373,13 @@ namespace Example_ci
 
         private void setPushToken(IDictionary<string, IList<string>> paramsDict)
         {
-            string token = paramsDict["pushToken"][0];
+            string token = getFirstParameterValue(paramsDict, "pushToken");
             Adjust.SetPushToken(token);
         }
 
         private void teardown(IDictionary<string, IList<string>> paramsDict)
         {
-            string deleteStatestring = paramsDict["deleteState"][0];
+            string deleteStatestring = getFirstParameterValue(paramsDict, "deleteState");
             var deleteState = Java.Lang.Boolean.ParseBoolean(deleteStatestring);
 
             Log.Debug("TestApp", "calling teardown with delete state");
@@ -364,14 +388,42 @@ namespace Example_ci
 
         private void openDeeplink(IDictionary<string, IList<string>> paramsDict)
         {
-            string deeplink = paramsDict["deeplink"][0];
+            string deeplink = getFirstParameterValue(paramsDict, "deeplink");
             Adjust.AppWillOpenUrl(Android.Net.Uri.Parse(deeplink));
         }
 
         private void sendReferrer(IDictionary<string, IList<string>> paramsDict)
         {
-            string referrer = paramsDict["referrer"][0];
+            string referrer = getFirstParameterValue(paramsDict, "referrer");
             Adjust.SetReferrer(referrer);
+        }
+
+        private void testBegin(IDictionary<string, IList<string>> paramsDict)
+        {
+            if (paramsDict.ContainsKey("basePath"))
+                this.basePath = getFirstParameterValue(paramsDict, "basePath");
+
+            AdjustFactory.Teardown(this.context, true);
+            AdjustFactory.TimerInterval = -1;
+            AdjustFactory.TimerStart = -1;
+            AdjustFactory.SessionInterval = -1;
+            AdjustFactory.SubsessionInterval = -1;
+            savedInstances.Clear();
+        }
+
+        private void testEnd(IDictionary<string, IList<string>> paramsDict)
+        {
+            AdjustFactory.Teardown(this.context, true);
+        }
+
+        private string getFirstParameterValue(IDictionary<string, IList<string>> paramsDict, String key)
+        {
+            if (paramsDict.ContainsKey(key) && paramsDict[key].Count > 1)
+            {
+                return paramsDict[key][0];
+            }
+
+            return null;
         }
     }
 }
