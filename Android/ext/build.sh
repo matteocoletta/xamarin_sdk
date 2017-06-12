@@ -2,15 +2,11 @@
 
 set -e
 
-MVNDIR=./sdk/Adjust
-JARINDIR=./sdk/Adjust/target
+SDKDIR=./sdk/Adjust
+JARINDIR=./sdk/Adjust/adjust/build/outputs
 JAROUTDIR=../AdjustSdk.Xamarin.Android/Jars
 
-(cd $MVNDIR; mvn clean)
-(cd $MVNDIR; mvn package)
+(cd $SDKDIR; ./gradlew clean :adjust:makeJar)
 
-rm -v -f $JAROUTDIR/adjust-android*; \
-cp -v $JARINDIR/adjust-android-*.*.*.jar $JAROUTDIR; \
-rm -v -f $JAROUTDIR/*-javadoc.jar; \
-rm -v -f $JAROUTDIR/*-sources.jar; \
-mv -v $JAROUTDIR/adjust-android-*.*.*.jar $JAROUTDIR/adjust-android.jar
+rm -v -f $JAROUTDIR/adjust-android.jar
+cp -v $JARINDIR/adjust*.jar $JAROUTDIR/adjust-android.jar
