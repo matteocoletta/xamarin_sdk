@@ -10,8 +10,7 @@ namespace Example_ci
     [Activity(Label = "Example_ci", MainLauncher = true, Icon = "@mipmap/icon")]
     public class MainActivity : Activity
     {
-        int count = 1;
-        private CommandExecutor commandExecutor;
+        private static TestLibrary testLibrary;
 
 		protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -22,9 +21,26 @@ namespace Example_ci
 
 			string baseUrl = "https://10.0.2.2:8443";
             AdjustFactory.SetTestingMode(baseUrl);
-            TestLibrary testLibrary = new TestLibrary(baseUrl, new CommandExecutor(this));
+            testLibrary = new TestLibrary(baseUrl, new CommandExecutor(this));
             testLibrary.InitTestSession("xamarin4.11.2@android4.11.4");
 		}
-    }
+
+        public static void AddInfoToSend(string key, string value)
+		{
+			if (null != testLibrary)
+			{
+				testLibrary.AddInfoToSend(key, value);
+			}
+		}
+
+	    public static void SendInfoToServer()
+		{
+			if (null != testLibrary)
+			{
+                testLibrary.SendInfoToServer();
+			}
+		}
+
+	}
 }
 

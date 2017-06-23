@@ -8,13 +8,13 @@ using Com.Adjust.Sdk;
 
 namespace Example_ci
 {
-    public class CommandExecutor : Java.Lang.Object, ICommandListener
+    public class CommandExecutor : Java.Lang.Object, ICommandListener,
+    IOnAttributionChangedListener,
+    IOnSessionTrackingFailedListener, IOnSessionTrackingSucceededListener,
+    IOnEventTrackingFailedListener, IOnEventTrackingSucceededListener
     {
         string TAG = "CommandExecutor";
         private string basePath;
-        private Dictionary<string, object> savedInstances = new Dictionary<string, object>();
-        private static string DefaultConfigName = "defaultConfig";
-        private static string DefaultEventName = "defaultEvent";
         private Context context;
 
         public CommandExecutor(Context context)
@@ -56,7 +56,7 @@ namespace Example_ci
             }
             catch (Java.Lang.Exception ex)
             {
-                Log.Error(TAG, "executeCommand: failed to parse command. Check commands' syntax");
+                Log.Error(TAG, ex.Message);
             }
         }
 
@@ -66,43 +66,44 @@ namespace Example_ci
             {
                 this.basePath = getFirstParameterValue(paramsDict, "basePath");
             }
+
+            if (paramsDict.ContainsKey("timerInterval")) 
+            {
+                AdjustFactory.TimerInterval = (long)Convert.ToDouble(getFirstParameterValue(paramsDict, "timerInterval"));
+            }
+
+            if (paramsDict.ContainsKey("timerStart")) 
+            {
+                AdjustFactory.TimerStart = (long)Convert.ToDouble(getFirstParameterValue(paramsDict, "timerStart"));
+            }
+
+            if (paramsDict.ContainsKey("sessionInterval")) 
+            {
+                AdjustFactory.SessionInterval = (long)Convert.ToDouble(getFirstParameterValue(paramsDict, "sessionInterval"));
+            }
+
+            if (paramsDict.ContainsKey("subsessionInterval")) 
+            {
+                AdjustFactory.SubsessionInterval = (long)Convert.ToDouble(getFirstParameterValue(paramsDict, "subsessionInterval"));
+            }
         }
 
-        private void config(IDictionary<string, IList<string>> paramsDict)
+        private AdjustConfig config(IDictionary<string, IList<string>> paramsDict)
         {
-            string configName = null;
-            if (paramsDict.ContainsKey("configName"))
+            string environment = getFirstParameterValue(paramsDict, "environment");
+            string appToken = getFirstParameterValue(paramsDict, "appToken");
+            Context context = this.context;
+            if (paramsDict.ContainsKey("context") && "null".Equals(paramsDict["context"]))
             {
-                configName = getFirstParameterValue(paramsDict, "configName");
+                context = null;
             }
-            else
-            {
-                configName = DefaultConfigName;
-            }
+            AdjustConfig adjustConfig = new AdjustConfig(context, appToken, environment);
+            adjustConfig.SetLogLevel(LogLevel.Verbose);
 
-            AdjustConfig adjustConfig = null;
-            if (savedInstances.ContainsKey(configName))
-            {
-                adjustConfig = (AdjustConfig)savedInstances[configName];
-            }
-            else
-            {
-                string environment = getFirstParameterValue(paramsDict, "environment");
-                string appToken = getFirstParameterValue(paramsDict, "appToken");
-                Context context = this.context;
-                if (paramsDict.ContainsKey("context") && "null".Equals(paramsDict["context"]))
-                {
-                    context = null;
-                }
-                adjustConfig = new AdjustConfig(context, appToken, environment);
-                adjustConfig.SetLogLevel(LogLevel.Verbose);
-                savedInstances.Add(configName, adjustConfig);
-            }
-
-            if (paramsDict.ContainsKey("logLevel"))
+			if (paramsDict.ContainsKey("logLevel"))
             {
                 string logLevelS = getFirstParameterValue(paramsDict, "logLevel");
-                LogLevel logLevel = null;
+				LogLevel logLevel = null;
 
                 switch (logLevelS)
                 {
@@ -129,7 +130,7 @@ namespace Example_ci
                         break;
                 }
 
-                adjustConfig.SetLogLevel(logLevel);
+				adjustConfig.SetLogLevel(logLevel);
             }
 
             if (paramsDict.ContainsKey("defaultTracker"))
@@ -171,59 +172,54 @@ namespace Example_ci
                 string userAgent = getFirstParameterValue(paramsDict, "userAgent");
                 adjustConfig.SetUserAgent(userAgent);
             }
-            // XXX add listeners
+
+            if (paramsDict.ContainsKey("attributionCallbackSendAll"))
+            {
+                adjustConfig.SetOnAttributionChangedListener(this);
+            }
+
+            if (paramsDict.ContainsKey("sessionCallbackSendSuccess"))
+            {
+                adjustConfig.SetOnSessionTrackingSucceededListener(this);
+            }
+
+            if (paramsDict.ContainsKey("sessionCallbackSendFailure"))
+            {
+                adjustConfig.SetOnSessionTrackingFailedListener(this);
+            }
+
+            if (paramsDict.ContainsKey("eventCallbackSendSuccess"))
+            {
+                adjustConfig.SetOnEventTrackingSucceededListener(this);
+            }
+
+            if (paramsDict.ContainsKey("eventCallbackSendFailure"))
+            {
+                adjustConfig.SetOnEventTrackingFailedListener(this);
+            }
+
+            return adjustConfig;
         }
 
         private void start(IDictionary<string, IList<string>> paramsDict)
         {
-            config(paramsDict);
-            string configName = null;
-            if (paramsDict.ContainsKey("configName"))
-            {
-                configName = getFirstParameterValue(paramsDict, "configName");
-            }
-            else
-            {
-                configName = DefaultConfigName;
-            }
-
-            AdjustConfig adjustConfig = (AdjustConfig)savedInstances[configName];
+            AdjustConfig adjustConfig = config(paramsDict);
 
             adjustConfig.SetBasePath(basePath);
+
             Adjust.OnCreate(adjustConfig);
         }
 
-        private void eventFunc(IDictionary<string, IList<string>> paramsDict)
+        private AdjustEvent eventFunc(IDictionary<string, IList<string>> paramsDict)
         {
-            string eventName = null;
-            if (paramsDict.ContainsKey("eventName"))
-            {
-                eventName = getFirstParameterValue(paramsDict, "eventName");
-            }
-            else
-            {
-                eventName = DefaultEventName;
-            }
-
-            AdjustEvent adjustEvent = null;
-            if (savedInstances.ContainsKey(eventName))
-            {
-                adjustEvent = (AdjustEvent)savedInstances[eventName];
-            }
-            else
-            {
-                string eventToken = getFirstParameterValue(paramsDict, "eventToken");
-                adjustEvent = new AdjustEvent(eventToken);
-                savedInstances.Add(eventName, adjustEvent);
-            }
+            string eventToken = getFirstParameterValue(paramsDict, "eventToken");
+            AdjustEvent adjustEvent = new AdjustEvent(eventToken);
 
             if (paramsDict.ContainsKey("revenue"))
             {
                 var revenueParams = (IList<string>)paramsDict["revenue"];
-                Log.Debug(TAG, "Received revenue of size: " + revenueParams.Count);
                 string currency = revenueParams[0];
                 var revenue = Java.Lang.Double.ParseDouble(revenueParams[1]);
-                Log.Debug(TAG, "Received revenue of currency [" + currency + "] and revenue [" + revenue + "]");
                 adjustEvent.SetRevenue(revenue, currency);
             }
 
@@ -234,7 +230,6 @@ namespace Example_ci
                 {
                     string key = callbackParams[i];
                     string value = callbackParams[i + 1];
-                    Log.Debug(TAG, "Received callbackParam of key [" + key + "] and value [" + value + "]");
                     adjustEvent.AddCallbackParameter(key, value);
                 }
             }
@@ -246,7 +241,6 @@ namespace Example_ci
                 {
                     string key = partnerParams[i];
                     string value = partnerParams[i + 1];
-                    Log.Debug(TAG, "Received partnerParams of key [" + key + "] and value [" + value + "]");
                     adjustEvent.AddPartnerParameter(key, value);
                 }
             }
@@ -256,21 +250,13 @@ namespace Example_ci
                 string orderId = getFirstParameterValue(paramsDict, "orderId");
                 adjustEvent.SetOrderId(orderId);
             }
+
+            return adjustEvent;
         }
 
         private void trackEvent(IDictionary<string, IList<string>> paramsDict)
         {
-            eventFunc(paramsDict);
-            string eventName = null;
-            if (paramsDict.ContainsKey("eventName"))
-            {
-                eventName = getFirstParameterValue(paramsDict, "eventName");
-            }
-            else
-            {
-                eventName = DefaultEventName;
-            }
-            AdjustEvent adjustEvent = (AdjustEvent)savedInstances[eventName];
+            AdjustEvent adjustEvent = eventFunc(paramsDict);
             Adjust.TrackEvent(adjustEvent);
         }
 
@@ -333,13 +319,13 @@ namespace Example_ci
                     Adjust.AddSessionPartnerParameter(key, value);
                 }
             }
-		}
+        }
 
         private void removeSessionCallbackParameter(IDictionary<string, IList<string>> paramsDict)
         {
-            if (paramsDict.ContainsKey("Key"))
+            if (paramsDict.ContainsKey("key"))
             {
-				var list = paramsDict["Key"];
+                var list = paramsDict["key"];
                 for (var i = 0; i < list.Count; i++)
                 {
                     string key = list[i];
@@ -350,16 +336,16 @@ namespace Example_ci
 
         private void removeSessionPartnerParameter(IDictionary<string, IList<string>> paramsDict)
         {
-			if (paramsDict.ContainsKey("Key"))
-			{
-				var list = paramsDict["Key"];
-				for (var i = 0; i < list.Count; i++)
-				{
-					string key = list[i];
-					Adjust.RemoveSessionPartnerParameter(key);
-				}
-			}
-		}
+            if (paramsDict.ContainsKey("key"))
+            {
+                var list = paramsDict["key"];
+                for (var i = 0; i < list.Count; i++)
+                {
+                    string key = list[i];
+                    Adjust.RemoveSessionPartnerParameter(key);
+                }
+            }
+        }
 
         private void resetSessionCallbackParameters(IDictionary<string, IList<string>> paramsDict)
         {
@@ -408,7 +394,6 @@ namespace Example_ci
             AdjustFactory.TimerStart = -1;
             AdjustFactory.SessionInterval = -1;
             AdjustFactory.SubsessionInterval = -1;
-            savedInstances.Clear();
         }
 
         private void testEnd(IDictionary<string, IList<string>> paramsDict)
@@ -416,9 +401,67 @@ namespace Example_ci
             AdjustFactory.Teardown(this.context, true);
         }
 
+        public void OnAttributionChanged(AdjustAttribution attribution)
+        {
+            MainActivity.AddInfoToSend("trackerToken", attribution.TrackerToken);
+            MainActivity.AddInfoToSend("trackerName", attribution.TrackerName);
+            MainActivity.AddInfoToSend("network", attribution.Network);
+            MainActivity.AddInfoToSend("campaign", attribution.Campaign);
+            MainActivity.AddInfoToSend("adgroup", attribution.Adgroup);
+            MainActivity.AddInfoToSend("creative", attribution.Creative);
+            MainActivity.AddInfoToSend("clickLabel", attribution.ClickLabel);
+            MainActivity.AddInfoToSend("adid", attribution.Adid);
+
+            MainActivity.SendInfoToServer();
+        }
+
+        public void OnFinishedSessionTrackingFailed(AdjustSessionFailure sessionFail)
+        {
+            MainActivity.AddInfoToSend("message", sessionFail.Message);
+            MainActivity.AddInfoToSend("timestamp", sessionFail.Timestamp);
+            MainActivity.AddInfoToSend("adid", sessionFail.Adid);
+            MainActivity.AddInfoToSend("willRetry", sessionFail.WillRetry.ToString());
+            MainActivity.AddInfoToSend("jsonResponse", sessionFail.JsonResponse.ToString());
+
+            MainActivity.SendInfoToServer();
+        }
+
+        public void OnFinishedSessionTrackingSucceeded(AdjustSessionSuccess sessionSuccess)
+        {
+            MainActivity.AddInfoToSend("message", sessionSuccess.Message);
+            MainActivity.AddInfoToSend("timestamp", sessionSuccess.Timestamp);
+            MainActivity.AddInfoToSend("adid", sessionSuccess.Adid);
+            MainActivity.AddInfoToSend("jsonResponse", sessionSuccess.JsonResponse.ToString());
+
+            MainActivity.SendInfoToServer();
+        }
+
+        public void OnFinishedEventTrackingFailed(AdjustEventFailure eventFail)
+        {
+            MainActivity.AddInfoToSend("message", eventFail.Message);
+            MainActivity.AddInfoToSend("timestamp", eventFail.Timestamp);
+            MainActivity.AddInfoToSend("adid", eventFail.Adid);
+            MainActivity.AddInfoToSend("eventToken", eventFail.EventToken);
+            MainActivity.AddInfoToSend("willRetry", eventFail.WillRetry.ToString());
+            MainActivity.AddInfoToSend("jsonResponse", eventFail.JsonResponse.ToString());
+
+            MainActivity.SendInfoToServer();
+        }
+
+        public void OnFinishedEventTrackingSucceeded(AdjustEventSuccess eventSuccess)
+        {
+            MainActivity.AddInfoToSend("message", eventSuccess.Message);
+            MainActivity.AddInfoToSend("timestamp", eventSuccess.Timestamp);
+            MainActivity.AddInfoToSend("adid", eventSuccess.Adid);
+            MainActivity.AddInfoToSend("eventToken", eventSuccess.EventToken);
+            MainActivity.AddInfoToSend("jsonResponse", eventSuccess.JsonResponse.ToString());
+
+            MainActivity.SendInfoToServer();
+        }
+
         private string getFirstParameterValue(IDictionary<string, IList<string>> paramsDict, String key)
         {
-            if (paramsDict.ContainsKey(key) && paramsDict[key].Count > 1)
+            if (paramsDict.ContainsKey(key) && paramsDict[key].Count >= 1)
             {
                 return paramsDict[key][0];
             }
