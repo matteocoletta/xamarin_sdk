@@ -420,7 +420,7 @@ namespace Example_ci
             MainActivity.AddInfoToSend("message", sessionFail.Message);
             MainActivity.AddInfoToSend("timestamp", sessionFail.Timestamp);
             MainActivity.AddInfoToSend("adid", sessionFail.Adid);
-            MainActivity.AddInfoToSend("willRetry", sessionFail.WillRetry.ToString());
+            MainActivity.AddInfoToSend("willRetry", sessionFail.WillRetry.ToString().ToLower());
             MainActivity.AddInfoToSend("jsonResponse", sessionFail.JsonResponse.ToString());
 
             MainActivity.SendInfoToServer();
@@ -442,7 +442,7 @@ namespace Example_ci
             MainActivity.AddInfoToSend("timestamp", eventFail.Timestamp);
             MainActivity.AddInfoToSend("adid", eventFail.Adid);
             MainActivity.AddInfoToSend("eventToken", eventFail.EventToken);
-            MainActivity.AddInfoToSend("willRetry", eventFail.WillRetry.ToString());
+            MainActivity.AddInfoToSend("willRetry", eventFail.WillRetry.ToString().ToLower());
             MainActivity.AddInfoToSend("jsonResponse", eventFail.JsonResponse.ToString());
 
             MainActivity.SendInfoToServer();
