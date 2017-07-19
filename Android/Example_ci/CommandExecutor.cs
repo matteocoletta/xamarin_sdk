@@ -173,6 +173,15 @@ namespace Example_ci
                 adjustConfig.SetUserAgent(userAgent);
             }
 
+            if (paramsDict.ContainsKey("sdkPrefix")) {
+                string sdkPrefix = getFirstParameterValue(paramsDict, "sdkPrefix");
+                adjustConfig.SetSdkPrefix(sdkPrefix);
+            }
+            else
+            {
+                adjustConfig.SetSdkPrefix("xamarin4.11.2");
+            }
+
             if (paramsDict.ContainsKey("attributionCallbackSendAll"))
             {
                 adjustConfig.SetOnAttributionChangedListener(this);

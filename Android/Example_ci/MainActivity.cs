@@ -22,8 +22,7 @@ namespace Example_ci
 			string baseUrl = "https://10.0.2.2:8443";
             AdjustFactory.SetTestingMode(baseUrl);
             testLibrary = new TestLibrary(baseUrl, new CommandExecutor(this));
-			testLibrary.SetTests("current/Test_SessionEventCallbacks");
-			testLibrary.InitTestSession("android4.11.4");
+			testLibrary.InitTestSession("xamarin4.11.2@android4.11.4");
 		}
 
         public static void AddInfoToSend(string key, string value)
