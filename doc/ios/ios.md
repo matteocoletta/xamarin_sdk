@@ -15,44 +15,50 @@ This is the Xamarin SDK of adjust™. You can read more about adjust™ at [adju
      * [Integrate the SDK into your app](#sdk-integrate)
      * [Adjust logging](#adjust-logging)
      * [Additional settings](#additional-settings)
-     * [Build your app](#build-your-app)
-   
+     * [SDK signature](#sdk-signature)
+     * [Build your app](#build-your-app) 
    
 ### Deep Linking
 
- * [Deep linking](#deeplinking)
-      * [Standard deep linking scenario](#deeplinking-standard)
-      * [Deep linking on iOS 8 and earlier](#deeplinking-setup-old)
-      * [Deep linking on iOS 9 and later](#deeplinking-setup-new)
-      * [Deferred deep linking scenario](#deeplinking-deferred)
-      * [Reattribution via deep links](#deeplinking-reattribution)
-
-
-* [Additional features](#additional-features)
+   * [Deep linking](#deeplinking)
+     * [Standard deep linking scenario](#deeplinking-standard)
+     * [Apple Universal Links](#apple-universal-links)
+     * [Deep linking on iOS 8 and earlier](#deeplinking-setup-old)
+     * [Deferred deep linking scenario](#deeplinking-deferred)
+     * [Reattribution via deep links](#deeplinking-reattribution)
+      
+ ### Event Tracking
+ 
    * [Event tracking](#event-tracking)
-      * [Revenue tracking](#revenue-tracking)
-      * [Revenue deduplication](#revenue-deduplication)
-      * [In-App Purchase verification](#iap-verification)
-      * [Callback parameters](#callback-parameters)
-      * [Partner parameters](#partner-parameters)
+     * [Revenue tracking](#revenue-tracking)
+     * [Revenue deduplication](#revenue-deduplication)
+     * [In-App Purchase verification](#iap-verification)
+     
+### Custom Parameters
+
+   * [Event Parameters](#event-parameters)
+     * [Event callback parameters](#callback-parameters)
+     * [Event partner parameters](#partner-parameters)
    * [Session parameters](#session-parameters)
-      * [Session callback parameters](#session-callback-parameters)
-      * [Session partner parameters](#session-partner-parameters)
-      * [Delay start](#delay-start)
+     * [Session callback parameters](#session-callback-parameters)
+     * [Session partner parameters](#session-partner-parameters)
+   * [Delay start](#delay-start)
+   
+### Additional Features
+
+   * [Push token (Uninstall/Reinstall tracking)](#push-token)
    * [Attribution callback](#attribution-callback)
    * [Session and event callbacks](#session-event-callbacks)
-   * [Disable tracking](#disable-tracking)
-   * [Offline mode](#offline-mode)
-   * [Event buffering](#event-buffering)
-   * [SDK signature](#sdk-signature)
-   * [Background tracking](#background-tracking)
-   * [Device IDs](#device-ids)
+    * [Device IDs](#device-ids)
       * [iOS Advertising Identifier](#di-idfa)
       * [Adjust device identifier](#di-adid)
-   * [Push token](#push-token)
    * [Pre-installed trackers](#pre-installed-trackers)
-  
-* [License](#license)
+   * [Event buffering](#event-buffering)
+   * [Background tracking](#background-tracking)
+   * [Offline mode](#offline-mode)
+   * [Disable tracking](#disable-tracking)
+   
+### [License](#license)
 
 ## <a id="example-apps"></a>Example apps
 
