@@ -2,18 +2,32 @@
 
 This is the Xamarin SDK of adjust™. You can read more about adjust™ at [adjust.com].
 
-## Table of contents
+---
 
-* [Example apps](#example-apps)
-* [Basic integration](#basic-integration)
-   * [Get the SDK](#sdk-get)
-   * [Add the SDK to your project](#sdk-add)
-   * [Add the SDK project reference to your app](#sdk-add-project)
-   * [Add the SDK DLL reference to your app](#sdk-add-dll)
-   * [Integrate the SDK into your app](#sdk-integrate)
-   * [Adjust logging](#adjust-logging)
-   * [Additional settings](#additional-settings)
-   * [Build your app](#build-your-app)
+### Quick Start
+
+   * [Example apps](#example-apps)
+   * [Getting Started](#getting-started)
+     * [Get the SDK](#sdk-get)
+     * [Add the SDK to your project](#sdk-add)
+     * [Add the SDK project reference to your app](#sdk-add-project)
+     * [Add the SDK DLL reference to your app](#sdk-add-dll)
+     * [Integrate the SDK into your app](#sdk-integrate)
+     * [Adjust logging](#adjust-logging)
+     * [Additional settings](#additional-settings)
+     * [Build your app](#build-your-app)
+   
+   
+### Deep Linking
+
+ * [Deep linking](#deeplinking)
+      * [Standard deep linking scenario](#deeplinking-standard)
+      * [Deep linking on iOS 8 and earlier](#deeplinking-setup-old)
+      * [Deep linking on iOS 9 and later](#deeplinking-setup-new)
+      * [Deferred deep linking scenario](#deeplinking-deferred)
+      * [Reattribution via deep links](#deeplinking-reattribution)
+
+
 * [Additional features](#additional-features)
    * [Event tracking](#event-tracking)
       * [Revenue tracking](#revenue-tracking)
@@ -37,19 +51,14 @@ This is the Xamarin SDK of adjust™. You can read more about adjust™ at [adju
       * [Adjust device identifier](#di-adid)
    * [Push token](#push-token)
    * [Pre-installed trackers](#pre-installed-trackers)
-   * [Deep linking](#deeplinking)
-      * [Standard deep linking scenario](#deeplinking-standard)
-      * [Deep linking on iOS 8 and earlier](#deeplinking-setup-old)
-      * [Deep linking on iOS 9 and later](#deeplinking-setup-new)
-      * [Deferred deep linking scenario](#deeplinking-deferred)
-      * [Reattribution via deep links](#deeplinking-reattribution)
+  
 * [License](#license)
 
 ## <a id="example-apps"></a>Example apps
 
 There is an iOS example app inside the [`iOS` directory][demo-app-ios]. You can open the Xamarin Studio project to see an example on how the adjust SDK can be integrated.
 
-## <a id="basic-integration"></a>Basic integration
+## <a id="getting-started"></a>Getting Started
 
 We will describe the steps to integrate the adjust SDK into your Xamarin Studio iOS project. We are going to assume that you use Xamarin Studio or Visual Studio for your iOS development.
 
