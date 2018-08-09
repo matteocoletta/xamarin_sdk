@@ -58,7 +58,11 @@ This is the Xamarin SDK of adjust™. You can read more about adjust™ at [adju
    * [Offline mode](#offline-mode)
    * [Disable tracking](#disable-tracking)
    
-### [License](#license)
+### License](#license)
+---
+
+## <a id="early-steps"></a>Quick Start
+
 
 ## <a id="example-apps"></a>Example apps
 
