@@ -196,6 +196,124 @@ Build and run your app. If the build succeeds, you should carefully read the SDK
 
 ![][run]
 
+Once you integrate the adjust SDK into your project, you can take advantage of the following features.
+
+
+
+## Deep Linking
+
+### <a id="deeplinking"></a>Deep linking
+
+If you are using the adjust tracker URL with an option to deep link into your app from the URL, there is the possibility to get info about the deep link URL and its content. Hitting the URL can happen when the user has your app already installed (standard deep linking scenario) or if they don't have the app on their device (deferred deep linking scenario).
+
+For more detailed information about deep linking in iOS and how to enable it for your app, please check our [official iOS SDK README][ios-readme-deeplinking].
+
+### <a id="deeplinking-standard"></a>Standard deep linking scenario
+
+If your user already has the app installed and hits the tracker URL with deep link information in it, your application will get opened and the content of the deep link will be sent to your app so that you can parse it and decide what to do next in your app. As you have read in our official iOS SDK README, deep linking in iOS at this moment can be done with usage of custom URL scheme in tracker URL (iOS 8 and earlier) or with usage of universal links (iOS 9 and newer).
+
+Depending on which scenario you want to use for your app (or if you want to use them both to support wide range of devices), you need to set up your app to handle one of these or both scenarios.
+
+### <a id="apple-universal-links"></a>Apple Universal Links
+
+In order to set deep linking support for iOS 9 and later devices, you need to enable your app to handle Apple universal links. If you followed our official iOS SDK README instructions, you have successfully enabled `Associated Domains` for your app in Apple Developer portal. In order to enable this in your app project, please open `Entitlements.plist`. In there you will see `Associated Domains` part which you need to enable by checking the `Enable Associated Domains` check box. After this you only need to add domain which was generated for you in the adjust dashboard.
+
+![][deeplinking_universal_links]
+
+With this completed, when your app gets opened by click on universal link, `ContinueUserActivity` method in your `AppDelegate` class will get called and you will get the deep link info in there.
+
+```cs
+public override bool ContinueUserActivity(UIApplication application, NSUserActivity userActivity, UIApplicationRestorationHandler completionHandler)
+{
+    if (userActivity.ActivityType == NSUserActivityType.BrowsingWeb)
+    {
+        // userActivity.WebPageUrl -> This is your deep link content.
+    }
+
+    return true;
+}
+```
+
+With this setup, you have successfully set up deep linking handling for iOS devices with iOS 9 and later versions.
+
+**On Safari and apps using Safari as in-app web browser, Deeplinks appended to an Adjust tracking URL (e.g. http://app.adjust.com/abc123?deep_link=myapp://) will only work after the implementation of universal linking.**
+
+### <a id="deeplinking-setup-old"></a>Deep linking on iOS 8 and earlier
+
+In order to set deep linking support for iOS 8 and earlier devices, you need to set up custom URL scheme in your app's `Info.plist` file. Open your `Info.plist` file and go to `Advanced` tab. In there, fill in your `Bundle ID` value in `Identifier` field and custom URL scheme for your app in `URL Schemes` field.
+
+![][deeplinking_custom_url_scheme]
+
+With this completed, when you app gets opened by click on tracker URL with deep link info which contains your custom URL scheme in it, `OpenUrl` method in your `AppDelegate` class will get called and you will get the deep link info in there.
+
+```cs
+public override bool OpenUrl(UIApplication application, NSUrl url, string sourceApplication, NSObject annotation)
+{
+    // url -> This is your deep link content.
+
+    return true;
+}
+```
+
+With this setup, you have successfully set up deep linking handling for iOS devices with iOS 8 and earlier versions.
+
+
+
+### <a id="deeplinking-deferred"></a>Deferred deep linking scenario
+
+In order to get info about the URL content in a deferred deep linking scenario, you should implement a callback method in the same way like you were setting callbacks for attribution, events and sessions. You need to override `AdjustDeeplinkResponse` in the class which inherits from `AdjustDelegate`:
+
+```cs
+public class AdjustDelegateXamarin : AdjustDelegate
+{
+    public override bool AdjustDeeplinkResponse(NSUrl deeplink)
+    {
+        Console.WriteLine("adjust: Deferred deep link received! URL = " + deeplink.ToString());
+
+        return true;
+        // return false;
+    }
+}
+```
+
+In deferred deep linking scenario, there is one additional setting which can be set in the `AdjustDeeplinkResponse` method via it's return value. Once the adjust SDK gets the deferred deep link info, we are offering you the possibility to choose whether our SDK should open this URL or not. You can choose to set this option by returning either `true` if you want us to open the URL or `false` if you don't want us to do anything.
+
+If this callback is not implemented, **the adjust SDK will always try to launch the URL by default**.
+
+### <a id="deeplinking-reattribution"></a>Reattribution via deep links
+
+Adjust enables you to run re-engagement campaigns with usage of deep links. For more information on how to do that, please check our [official docs][reattribution-with-deeplinks]. 
+
+If you are using this feature, in order for your user to be properly reattributed, you need to make one additional call to the adjust SDK in your app.
+
+Once you have received deep link content information in your app, add a call to `Adjust.AppWillOpenUrl` method. By making this call, the adjust SDK will try to find if there is any new attribution info inside of the deep link and if any, it will be sent to the adjust backend. If your user should be reattributed due to a click on the adjust tracker URL with deep link content in it, you will see the [attribution callback](#attribution-callback) in your app being triggered with new attribution info for this user.
+
+The call to `Adjust.AppWillOpenUrl` should be done like this to support deeplinking in all iOS versions:
+
+```cs
+public override bool OpenUrl(UIApplication application, NSUrl url, string sourceApplication, NSObject annotation)
+{
+    // url -> This is your deep link content.
+    Adjust.AppWillOpenUrl(url);
+
+    return true;
+}
+```
+
+```cs
+public override bool ContinueUserActivity(UIApplication application, NSUserActivity userActivity, UIApplicationRestorationHandler completionHandler)
+{
+    if (userActivity.ActivityType == NSUserActivityType.BrowsingWeb)
+    {
+        // userActivity.WebPageUrl -> This is your deep link content.
+        Adjust.AppWillOpenUrl(userActivity.WebPageUrl);
+    }
+
+    return true;
+}
+```
+
+
 ## <a id="additional-features"></a>Additional features
 
 Once you integrate the adjust SDK into your app, you can take advantage of the following features.
@@ -611,112 +729,6 @@ If you want to use the adjust SDK to recognize users that found your app pre-ins
     Default tracker: 'abc123'
     ```
 
-### <a id="deeplinking"></a>Deep linking
-
-If you are using the adjust tracker URL with an option to deep link into your app from the URL, there is the possibility to get info about the deep link URL and its content. Hitting the URL can happen when the user has your app already installed (standard deep linking scenario) or if they don't have the app on their device (deferred deep linking scenario).
-
-For more detailed information about deep linking in iOS and how to enable it for your app, please check our [official iOS SDK README][ios-readme-deeplinking].
-
-### <a id="deeplinking-standard"></a>Standard deep linking scenario
-
-If your user already has the app installed and hits the tracker URL with deep link information in it, your application will get opened and the content of the deep link will be sent to your app so that you can parse it and decide what to do next in your app. As you have read in our official iOS SDK README, deep linking in iOS at this moment can be done with usage of custom URL scheme in tracker URL (iOS 8 and earlier) or with usage of universal links (iOS 9 and newer).
-
-Depending on which scenario you want to use for your app (or if you want to use them both to support wide range of devices), you need to set up your app to handle one of these or both scenarios.
-
-### <a id="deeplinking-setup-old"></a>Deep linking on iOS 8 and earlier
-
-In order to set deep linking support for iOS 8 and earlier devices, you need to set up custom URL scheme in your app's `Info.plist` file. Open your `Info.plist` file and go to `Advanced` tab. In there, fill in your `Bundle ID` value in `Identifier` field and custom URL scheme for your app in `URL Schemes` field.
-
-![][deeplinking_custom_url_scheme]
-
-With this completed, when you app gets opened by click on tracker URL with deep link info which contains your custom URL scheme in it, `OpenUrl` method in your `AppDelegate` class will get called and you will get the deep link info in there.
-
-```cs
-public override bool OpenUrl(UIApplication application, NSUrl url, string sourceApplication, NSObject annotation)
-{
-    // url -> This is your deep link content.
-
-    return true;
-}
-```
-
-With this setup, you have successfully set up deep linking handling for iOS devices with iOS 8 and earlier versions.
-
-### <a id="deeplinking-setup-new"></a>Deep linking on iOS 9 and later
-
-In order to set deep linking support for iOS 9 and later devices, you need to enable your app to handle Apple universal links. If you followed our official iOS SDK README instructions, you have successfully enabled `Associated Domains` for your app in Apple Developer portal. In order to enable this in your app project, please open `Entitlements.plist`. In there you will see `Associated Domains` part which you need to enable by checking the `Enable Associated Domains` check box. After this you only need to add domain which was generated for you in the adjust dashboard.
-
-![][deeplinking_universal_links]
-
-With this completed, when your app gets opened by click on universal link, `ContinueUserActivity` method in your `AppDelegate` class will get called and you will get the deep link info in there.
-
-```cs
-public override bool ContinueUserActivity(UIApplication application, NSUserActivity userActivity, UIApplicationRestorationHandler completionHandler)
-{
-    if (userActivity.ActivityType == NSUserActivityType.BrowsingWeb)
-    {
-        // userActivity.WebPageUrl -> This is your deep link content.
-    }
-
-    return true;
-}
-```
-
-With this setup, you have successfully set up deep linking handling for iOS devices with iOS 9 and later versions.
-
-### <a id="deeplinking-deferred"></a>Deferred deep linking scenario
-
-In order to get info about the URL content in a deferred deep linking scenario, you should implement a callback method in the same way like you were setting callbacks for attribution, events and sessions. You need to override `AdjustDeeplinkResponse` in the class which inherits from `AdjustDelegate`:
-
-```cs
-public class AdjustDelegateXamarin : AdjustDelegate
-{
-    public override bool AdjustDeeplinkResponse(NSUrl deeplink)
-    {
-        Console.WriteLine("adjust: Deferred deep link received! URL = " + deeplink.ToString());
-
-        return true;
-        // return false;
-    }
-}
-```
-
-In deferred deep linking scenario, there is one additional setting which can be set in the `AdjustDeeplinkResponse` method via it's return value. Once the adjust SDK gets the deferred deep link info, we are offering you the possibility to choose whether our SDK should open this URL or not. You can choose to set this option by returning either `true` if you want us to open the URL or `false` if you don't want us to do anything.
-
-If this callback is not implemented, **the adjust SDK will always try to launch the URL by default**.
-
-### <a id="deeplinking-reattribution"></a>Reattribution via deep links
-
-Adjust enables you to run re-engagement campaigns with usage of deep links. For more information on how to do that, please check our [official docs][reattribution-with-deeplinks]. 
-
-If you are using this feature, in order for your user to be properly reattributed, you need to make one additional call to the adjust SDK in your app.
-
-Once you have received deep link content information in your app, add a call to `Adjust.AppWillOpenUrl` method. By making this call, the adjust SDK will try to find if there is any new attribution info inside of the deep link and if any, it will be sent to the adjust backend. If your user should be reattributed due to a click on the adjust tracker URL with deep link content in it, you will see the [attribution callback](#attribution-callback) in your app being triggered with new attribution info for this user.
-
-The call to `Adjust.AppWillOpenUrl` should be done like this to support deeplinking in all iOS versions:
-
-```cs
-public override bool OpenUrl(UIApplication application, NSUrl url, string sourceApplication, NSObject annotation)
-{
-    // url -> This is your deep link content.
-    Adjust.AppWillOpenUrl(url);
-
-    return true;
-}
-```
-
-```cs
-public override bool ContinueUserActivity(UIApplication application, NSUserActivity userActivity, UIApplicationRestorationHandler completionHandler)
-{
-    if (userActivity.ActivityType == NSUserActivityType.BrowsingWeb)
-    {
-        // userActivity.WebPageUrl -> This is your deep link content.
-        Adjust.AppWillOpenUrl(userActivity.WebPageUrl);
-    }
-
-    return true;
-}
-```
 
 [dashboard]: 	http://adjust.com
 [adjust.com]:	http://adjust.com
