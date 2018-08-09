@@ -174,6 +174,22 @@ In order to get Xamarin iOS app project to recognize categories from adjust iOS 
 
 ![][additional_flags]
 
+### <a id="sdk-signature"></a>SDK signature
+
+An account manager must activate the Adjust SDK signature. Contact Adjust support (support@adjust.com) if you are interested in using this feature.
+
+If the SDK signature has already been enabled on your account and you have access to App Secrets in your Adjust Dashboard, please use the method below to integrate the SDK signature into your app.
+
+An App Secret is set by passing all secret parameters (`secretId`, `info1`, `info2`, `info3`, `info4`) to `setAppSecret` method of `AdjustConfig` instance:
+
+```csharp
+AdjustConfig adjustConfig = AdjustConfig(this, appToken, environment);
+
+adjustConfig.SetAppSecret(secretId, info1, info2, info3, info4);
+
+Adjust.OnCreate(adjustConfig);
+```
+
 ### <a id="build-your-app"></a>Build your app
 
 Build and run your app. If the build succeeds, you should carefully read the SDK logs in the console. After the app launched for the first time, you should see the info log `Install tracked`.
@@ -511,22 +527,6 @@ Adjust.AppDidLaunch(config);
 ```
 
 If nothing is set, event buffering is **disabled by default**.
-
-### <a id="sdk-signature"></a>SDK signature
-
-An account manager must activate the Adjust SDK signature. Contact Adjust support (support@adjust.com) if you are interested in using this feature.
-
-If the SDK signature has already been enabled on your account and you have access to App Secrets in your Adjust Dashboard, please use the method below to integrate the SDK signature into your app.
-
-An App Secret is set by passing all secret parameters (`secretId`, `info1`, `info2`, `info3`, `info4`) to `setAppSecret` method of `AdjustConfig` instance:
-
-```csharp
-AdjustConfig adjustConfig = AdjustConfig(this, appToken, environment);
-
-adjustConfig.SetAppSecret(secretId, info1, info2, info3, info4);
-
-Adjust.OnCreate(adjustConfig);
-```
 
 ### <a id="background-tracking"></a>Background tracking
 
