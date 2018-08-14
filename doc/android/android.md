@@ -2,10 +2,12 @@
 
 This is the Xamarin SDK of adjust™. You can read more about adjust™ at [adjust.com].
 
-## Table of contents
+---
+
+### Quick Start
 
 * [Example apps](#example-apps)
-* [Basic integration](#basic-integration)
+* [Getting started](#getting-started)
    * [Get the SDK](#sdk-get)
    * [Add the SDK to your project](#sdk-add)
    * [Add the SDK project reference to your app](#sdk-add-project)
@@ -13,44 +15,62 @@ This is the Xamarin SDK of adjust™. You can read more about adjust™ at [adju
    * [Add Google Play Services](#sdk-gps)
    * [Add permissions](#sdk-permissions)
    * [Install referrer](#android-referrer)
-      * [Google Play Referrer API](#android-referrer-gpr-api)
-      * [Google Play Store intent](#android-referrer-gps-intent)
+     * [Google Play Referrer API](#android-referrer-gpr-api)
+     * [Google Play Store intent](#android-referrer-gps-intent)
    * [Proguard settings](#sdk-proguard)
    * [Integrate the SDK into your app](#sdk-integrate)
    * [Session tracking](#session-tracking)
-      * [API level 14 and higher](#session-tracking-api14)
-      * [API level 9 until 13](#session-tracking-api9)
+     * [API level 14 and higher](#session-tracking-api14)
+     * [API level 9 until 13](#session-tracking-api9)
    * [Adjust logging](#adjust-logging)
-   * [Build your app](#build-your-app)
-* [Additional features](#additional-features)
-   * [Event tracking](#event-tracking)
-      * [Revenue tracking](#revenue-tracking)
-      * [Revenue deduplication](#revenue-deduplication)
-      * [In-App Purchase verification](#iap-verification)
-      * [Callback parameters](#callback-parameters)
-      * [Partner parameters](#partner-parameters)
-   * [Session parameters](#session-parameters)
-      * [Session callback parameters](#session-callback-parameters)
-      * [Session partner parameters](#session-partner-parameters)
-      * [Delay start](#delay-start)
-   * [Attribution callback](#attribution-callback)
-   * [Session and event callbacks](#session-event-callbacks)
-   * [Disable tracking](#disable-tracking)
-   * [Offline mode](#offline-mode)
-   * [Event buffering](#event-buffering)
    * [SDK signature](#sdk-signature)
-   * [Background tracking](#background-tracking)
-   * [Device IDs](#device-ids)
-      * [Google Play Services advertising identifier](#di-gps-adid)
-      * [Amazon advertising identifier](#di-fire-adid)
-      * [Adjust device identifier](#di-adid)
-   * [Push token](#push-token)
+   * [Build your app](#build-your-app)
+   
+### Deep Linking
+
+* [Deep linking](#deeplinking)
+  * [Standard deep linking scenario](#deeplinking-standard)
+  * [Deferred deep linking scenario](#deeplinking-deferred)
+  * [Reattribution via deep links](#deeplinking-reattribution)
+     
+### Event Tracking
+
+* [Event tracking](#event-tracking)
+  * [Revenue tracking](#revenue-tracking)
+  * [Revenue deduplication](#revenue-deduplication)
+  * [In-App Purchase verification](#iap-verification)
+     
+### Custom Parameters
+
+* [Event Parameters](#event-parameters)
+  * [Callback parameters](#callback-parameters)
+  * [Partner parameters](#partner-parameters)
+* [Session parameters](#session-parameters)
+  * [Session callback parameters](#session-callback-parameters)
+  * [Session partner parameters](#session-partner-parameters)
+* [Delay start](#delay-start)
+
+* [Additional features](#additional-features)
+   
+* [Push token](#push-token)
+* [Attribution callback](#attribution-callback)
+* [Session and event callbacks](#session-event-callbacks)
+* [Device IDs](#device-ids)
+  * [Google Play Services advertising identifier](#di-gps-adid)
+  * [Amazon advertising identifier](#di-fire-adid)
+  * [Adjust device identifier](#di-adid)
+* [Event buffering](#event-buffering)
+* [Offline mode](#offline-mode)
+* [Disable tracking](#disable-tracking)
+   
+   
+   
+   
+   
+   
    * [Track additional device identifiers](#track-additional-ids)
    * [Pre-installed trackers](#pre-installed-trackers)
-   * [Deep linking](#deeplinking)
-      * [Standard deep linking scenario](#deeplinking-standard)
-      * [Deferred deep linking scenario](#deeplinking-deferred)
-      * [Reattribution via deep links](#deeplinking-reattribution)
+   
 * [License](#license)
 
 ## <a id="example-apps"></a>Example apps
