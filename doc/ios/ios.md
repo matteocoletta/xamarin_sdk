@@ -314,9 +314,7 @@ public override bool ContinueUserActivity(UIApplication application, NSUserActiv
 ```
 
 
-## <a id="additional-features"></a>Additional features
-
-Once you integrate the adjust SDK into your app, you can take advantage of the following features.
+## Event Tracking
 
 ### <a id="event-tracking"></a>Event tracking
 
@@ -381,7 +379,14 @@ public void UpdatedTransactions(SKPaymentQueue queue, SKPaymentTransaction[] tra
 
 In-App purchase verification can be done with Xamarin purchase SDK which is currently being developed and will soon be publicly available. For more information, please contact support@adjust.com.
 
-### <a id="callback-parameters"></a>Callback parameters
+## Custom Parameters
+
+In addition to the data points that Adjust collects [by default](https://partners.adjust.com/placeholders/), you can use the Adjust SDK to track and add to the events as many custom values as you need (user IDs, product IDs...). Custom parameters are only available as raw data (i.e., they won't appear in the Adjust dashboard).
+
+You should use Callback parameters for the values that you collect for your own internal use, and Partner parameters for those that you wish to share with external partners. If a value (e.g. product ID) is tracked both for internal use and to forward it to external partners, the best practice would be to track it both as callback and partner parameter.
+
+
+### <a id="callback-parameters"></a>Event callback parameters
 
 You can register a callback URL for your events in your [dashboard]. We will send a GET request to that URL whenever the event is tracked. You can add callback parameters to that event by calling `AddCallbackParameter` on the event before tracking it. We will then append these parameters to your callback URL.
 
