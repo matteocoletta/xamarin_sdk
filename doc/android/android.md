@@ -50,7 +50,7 @@ This is the Xamarin SDK of adjust™. You can read more about adjust™ at [adju
   * [Session partner parameters](#session-partner-parameters)
 * [Delay start](#delay-start)
 
-* [Additional features](#additional-features)
+### Additional Features
    
 * [Push token](#push-token)
 * [Attribution callback](#attribution-callback)
