@@ -498,6 +498,21 @@ In this case this will make the adjust SDK not send the initial install session 
 
 **The maximum delay start time of the adjust SDK is 10 seconds**.
 
+## Additional features
+
+
+### <a id="push-token"></a>Push token (Uninstall/Reinstall tracking)
+
+To send us the push notifications token, then add the following call to Adjust **when ever you get your token in the app or when it gets updated**:
+
+```cs
+NSData pushNotificationsToken;	// Obtain and assign your push notification token as NSData type.
+
+Adjust.SetDeviceToken(pushNotificationsToken);
+```
+
+Push tokens are used for the Adjust Audience Builder and client callbacks, and are required for the upcoming uninstall tracking feature.
+
 ### <a id="attribution-callback"></a>Attribution callback
 
 You can register a callback to be notified of tracker attribution changes. Due to the different sources considered for attribution, this information can not by provided synchronously. Follow these steps to implement the optional callback in your app:
@@ -545,6 +560,14 @@ The callback function will be called  when the SDK receives final attribution da
 - `string Creative` the creative grouping level of the current attribution.
 - `string ClickLabel` the click label of the current attribution.
 - `string Adid` the adjust device identifier.
+
+### <a id="user-attribution"></a>User attribution
+
+The attribution callback will be triggered as described in the [attribution callback section](#attribution-callback), providing you with information about any new attribution whenever it changes. If you want to access information about a user's current attribution at any other time, you can do so through the following property of the `Adjust` instance:
+
+```cs
+ADJAttribution attribution = Adjust.Attribution;
+```
 
 ### <a id="session-event-callbacks"></a>Session and event callbacks
 
@@ -613,30 +636,56 @@ And both event and session failed objects also contain:
 
 - `bool WillRetry` indicates there will be an attempt to resend the package at a later time.
 
-### <a id="disable-tracking"></a>Disable tracking
+### <a id="device-ids"></a>Device IDs
 
-You can disable the adjust SDK from tracking by invoking the method `SetEnabled` with the enabled parameter as `false`. **This setting is remembered between sessions**, but it can only be activated after the first session.
+The adjust SDK offers the possibility to obtain some device identifiers.
 
-```cs
-Adjust.SetEnabled(false);
-```
+### <a id="di-idfa"></a>iOS Advertising Identifier
 
-You can verify if the adjust SDK is currently active with the property `IsEnabled`. It is always possible to activate the adjust SDK by invoking `SetEnabled` with the enabled parameter set to `true`.
+Certain services (such as Google Analytics) require you to coordinate device and client IDs in order to prevent duplicate reporting.
 
-### <a id="offline-mode"></a>Offline mode
-
-You can put the adjust SDK in offline mode to suspend transmission to our servers, while retaining tracked data to be sent later. When in offline mode, all information is saved in a file, so be careful not to trigger too many events.
-
-You can activate offline mode by calling `SetOfflineMode` with the parameter `true`.
+To obtain the IDFA device identifier, access the `Idfa` property of the `Adjust` instance:
 
 ```cs
-Adjust.SetOfflineMode(true);
+string idfa = Adjust.Idfa;
 ```
 
-Conversely, you can deactivate offline mode by calling `SetOfflineMode` with `false`. When the adjust SDK is put back in online mode, all saved information is send to our servers with the correct time information.
+### <a id="di-adid"></a>Adjust device identifier
 
-Unlike disabling tracking, **this setting is not remembered** between sessions. This means that the SDK is in online mode whenever it is started, even if the app was terminated in offline mode.
+For each device with your app installed, the adjust backend generates a unique **adjust device identifier** (**adid**). In order to obtain this identifier, you can access the following property of the `Adjust` instance:
 
+```cs
+stirng adid = Adjust.Adid;
+```
+
+**Note**: Information about the **adid** is available after the app's installation has been tracked by the adjust backend. From that moment on, the adjust SDK has information about the device **adid** and you can access it with this method. So, **it is not possible** to access the **adid** before the SDK has been initialised and the installation of your app has been successfully tracked.
+
+### <a id="pre-installed-trackers"></a>Pre-installed trackers
+
+If you want to use the adjust SDK to recognize users that found your app pre-installed on their device, follow these steps.
+
+1. Create a new tracker in your [dashboard].
+2. Open your app delegate and add set the default tracker of your `ADJConfig`:
+
+    ```cs
+    var config = ADJConfig.ConfigWithAppToken(yourAppToken, environment);
+
+    config.DefaultTracker = "{TrackerToken}";
+
+    Adjust.AppDidLaunch(config);
+    ```
+
+  Replace `{TrackerToken}` with the tracker token you created in step 2. Please note that the dashboard displays a tracker 
+  URL (including `http://app.adjust.com/`). In your source code, you should specify only the six-character token and not the
+  entire URL.
+
+3. Build and run your app. You should see a line like the following in app's log output:
+
+    ```
+    Default tracker: 'abc123'
+    ```
+    
+    
 ### <a id="event-buffering"></a>Event buffering
 
 If your app makes heavy use of event tracking, you might want to delay some HTTP requests in order to send them in one batch every minute. You can enable event buffering with your `ADJConfig` instance:
@@ -665,74 +714,29 @@ Adjust.AppDidLaunch(config);
 
 If nothing set, sending in background is **disabled by default**.
 
-### <a id="device-ids"></a>Device IDs
+### <a id="offline-mode"></a>Offline mode
 
-The adjust SDK offers the possibility to obtain some device identifiers.
+You can put the adjust SDK in offline mode to suspend transmission to our servers, while retaining tracked data to be sent later. When in offline mode, all information is saved in a file, so be careful not to trigger too many events.
 
-### <a id="di-idfa"></a>iOS Advertising Identifier
-
-Certain services (such as Google Analytics) require you to coordinate device and client IDs in order to prevent duplicate reporting.
-
-To obtain the IDFA device identifier, access the `Idfa` property of the `Adjust` instance:
+You can activate offline mode by calling `SetOfflineMode` with the parameter `true`.
 
 ```cs
-string idfa = Adjust.Idfa;
+Adjust.SetOfflineMode(true);
 ```
 
-### <a id="di-adid"></a>Adjust device identifier
+Conversely, you can deactivate offline mode by calling `SetOfflineMode` with `false`. When the adjust SDK is put back in online mode, all saved information is send to our servers with the correct time information.
 
-For each device with your app installed, the adjust backend generates a unique **adjust device identifier** (**adid**). In order to obtain this identifier, you can access the following property of the `Adjust` instance:
+Unlike disabling tracking, **this setting is not remembered** between sessions. This means that the SDK is in online mode whenever it is started, even if the app was terminated in offline mode.
+
+### <a id="disable-tracking"></a>Disable tracking
+
+You can disable the adjust SDK from tracking by invoking the method `SetEnabled` with the enabled parameter as `false`. **This setting is remembered between sessions**, but it can only be activated after the first session.
 
 ```cs
-stirng adid = Adjust.Adid;
+Adjust.SetEnabled(false);
 ```
 
-**Note**: Information about the **adid** is available after the app's installation has been tracked by the adjust backend. From that moment on, the adjust SDK has information about the device **adid** and you can access it with this method. So, **it is not possible** to access the **adid** before the SDK has been initialised and the installation of your app has been successfully tracked.
-
-### <a id="user-attribution"></a>User attribution
-
-The attribution callback will be triggered as described in the [attribution callback section](#attribution-callback), providing you with information about any new attribution whenever it changes. If you want to access information about a user's current attribution at any other time, you can do so through the following property of the `Adjust` instance:
-
-```cs
-ADJAttribution attribution = Adjust.Attribution;
-```
-
-### <a id="push-token"></a>Push token
-
-To send us the push notifications token, then add the following call to Adjust **when ever you get your token in the app or when it gets updated**:
-
-```cs
-NSData pushNotificationsToken;	// Obtain and assign your push notification token as NSData type.
-
-Adjust.SetDeviceToken(pushNotificationsToken);
-```
-
-Push tokens are used for the Adjust Audience Builder and client callbacks, and are required for the upcoming uninstall tracking feature.
-
-### <a id="pre-installed-trackers"></a>Pre-installed trackers
-
-If you want to use the adjust SDK to recognize users that found your app pre-installed on their device, follow these steps.
-
-1. Create a new tracker in your [dashboard].
-2. Open your app delegate and add set the default tracker of your `ADJConfig`:
-
-    ```cs
-    var config = ADJConfig.ConfigWithAppToken(yourAppToken, environment);
-
-    config.DefaultTracker = "{TrackerToken}";
-
-    Adjust.AppDidLaunch(config);
-    ```
-
-  Replace `{TrackerToken}` with the tracker token you created in step 2. Please note that the dashboard displays a tracker 
-  URL (including `http://app.adjust.com/`). In your source code, you should specify only the six-character token and not the
-  entire URL.
-
-3. Build and run your app. You should see a line like the following in app's log output:
-
-    ```
-    Default tracker: 'abc123'
-    ```
+You can verify if the adjust SDK is currently active with the property `IsEnabled`. It is always possible to activate the adjust SDK by invoking `SetEnabled` with the enabled parameter set to `true`.
 
 
 [dashboard]: 	http://adjust.com
