@@ -732,6 +732,16 @@ In this case, this will make the adjust SDK not send the initial install session
 
 Once you have integrated the Adjust SDK into your project, you can take advantage of the following features.
 
+### <a id="push-token"></a>Push token (Uninstall/Reinstall tracking)
+
+To send us the push notification token, add the following call to Adjust **once you have obtained your token or when ever it's value is changed**:
+
+```cs
+Adjust.SetPushToken(pushNotificationsToken, this);
+```
+
+Push tokens are used for Audience Builder and client callbacks, and they are required for the upcoming uninstall tracking feature.
+
 ### <a id="attribution-callback"></a>Attribution callback
 
 You can register a callback to be notified of tracker attribution changes. Due to the different sources considered for attribution, this information can not by provided synchronously. Follow these steps to implement the optional callback in your app:
@@ -905,59 +915,11 @@ And both event and session failed objects also contain:
 
 - `bool WillRetry` indicates there will be an attempt to resend the package at a later time.
 
-### <a id="event-buffering"></a>Event buffering
 
-If your app makes heavy use of event tracking, then you might want to delay some HTTP requests in order to send them in a single batch per minute.
-
-You can enable event buffering with your `AdjustConfig` instance:
-
-```cs
-AdjustConfig config = new AdjustConfig(this, yourAppToken, environment);
-
-config.SetEventBufferingEnabled((Java.Lang.Boolean)true);
-
-Adjust.OnCreate(config);
-```
-
-If nothing is set, event buffering is **disabled by default**.
-
-### <a id="offline-mode"></a>Offline mode
-
-You can put the adjust SDK in offline mode to suspend transmission to our servers, while still retaining tracked data to be sent later. While in offline mode, all information is saved in a file, so be careful to avoid triggering too many events while in offline mode.
-
-You can activate offline mode by calling method `SetOfflineMode` with parameter `true`:
-
-```cs
-Adjust.SetOfflineMode (true);
-```
-
-Conversely, you can deactivate offline mode calling `SetOfflineMode` method with parameter `false`. When the adjust SDK is put back in online mode, all saved information is send to our servers with the correct time information.
-
-Unlike disabling tracking, **this setting is not remembered** between sessions. This means that the SDK is in online mode whenever it is started, even if the app was terminated in offline mode.
-
-### <a id="disable-tracking"></a>Disable tracking
-
-You can disable the adjust SDK from tracking any activities of the current device by assigning parameter `false` to `Enabled` property. **This setting is remembered between sessions**, but it can only be activated after the first session.
-
-```cs
-Adjust.Enabled = false;
-```
 
 You can check if the adjust SDK is currently enabled by checking the `Enabled` property. It is always possible to activate the adjust SDK by invoking `Enabled` with the enabled parameter as `true`.
 
-### <a id="background-tracking"></a>Background tracking
 
-The default behaviour of the adjust SDK is to **pause sending HTTP requests while the app is in the background**. You can change this in your `AdjustConfig` instance:
-
-```cs
-AdjustConfig config = new AdjustConfig(this, yourAppToken, environment);
-
-config.SetSendInBackground(true);
-
-Adjust.OnCreate(config);
-```
-
-If nothing set, sending in background is **disabled by default**.
 
 ### <a id="device-ids"></a>Device IDs
 
@@ -1028,16 +990,6 @@ AdjustAttribution attribution = Adjust.Attribution;
 
 **Note**: Information about current attribution is available after app installation has been tracked by the adjust backend and attribution callback has been triggered. From that moment on, the adjust SDK has information about a user's attribution and you can access it with this method. So, **it is not possible** to access a user's attribution value before the SDK has been initialised and attribution callback has been triggered.
 
-### <a id="push-token"></a>Push token
-
-To send us the push notification token, add the following call to Adjust **once you have obtained your token or when ever it's value is changed**:
-
-```cs
-Adjust.SetPushToken(pushNotificationsToken, this);
-```
-
-Push tokens are used for Audience Builder and client callbacks, and they are required for the upcoming uninstall tracking feature.
-
 ### <a id="track-additional-ids"></a>Track additional device identifiers
 
 If you are distributing your Android app **outside of the Google Play Store** and would like to track additional device identifiers (IMEI and MEID), you need to explicitly instruct the Adjust SDK to do so. You can do that by calling the `setReadMobileEquipmentIdentity` method of the `AdjustConfig` instance. **The Adjust SDK does not collect these identifiers by default**.
@@ -1075,6 +1027,58 @@ If you want to use the adjust SDK to recognize users that found your app pre-ins
     ```
     Default tracker: 'abc123'
     ```
+
+### <a id="event-buffering"></a>Event buffering
+
+If your app makes heavy use of event tracking, then you might want to delay some HTTP requests in order to send them in a single batch per minute.
+
+You can enable event buffering with your `AdjustConfig` instance:
+
+```cs
+AdjustConfig config = new AdjustConfig(this, yourAppToken, environment);
+
+config.SetEventBufferingEnabled((Java.Lang.Boolean)true);
+
+Adjust.OnCreate(config);
+```
+
+If nothing is set, event buffering is **disabled by default**.
+
+### <a id="background-tracking"></a>Background tracking
+
+The default behaviour of the adjust SDK is to **pause sending HTTP requests while the app is in the background**. You can change this in your `AdjustConfig` instance:
+
+```cs
+AdjustConfig config = new AdjustConfig(this, yourAppToken, environment);
+
+config.SetSendInBackground(true);
+
+Adjust.OnCreate(config);
+```
+
+### <a id="offline-mode"></a>Offline mode
+
+You can put the adjust SDK in offline mode to suspend transmission to our servers, while still retaining tracked data to be sent later. While in offline mode, all information is saved in a file, so be careful to avoid triggering too many events while in offline mode.
+
+You can activate offline mode by calling method `SetOfflineMode` with parameter `true`:
+
+```cs
+Adjust.SetOfflineMode (true);
+```
+
+Conversely, you can deactivate offline mode calling `SetOfflineMode` method with parameter `false`. When the adjust SDK is put back in online mode, all saved information is send to our servers with the correct time information.
+
+Unlike disabling tracking, **this setting is not remembered** between sessions. This means that the SDK is in online mode whenever it is started, even if the app was terminated in offline mode.
+
+### <a id="disable-tracking"></a>Disable tracking
+
+You can disable the adjust SDK from tracking any activities of the current device by assigning parameter `false` to `Enabled` property. **This setting is remembered between sessions**, but it can only be activated after the first session.
+
+```cs
+Adjust.Enabled = false;
+```
+
+If nothing set, sending in background is **disabled by default**.
 
 ### <a id="gdpr-forget-me"></a>GDPR right to be forgotten
  In accordance with article 17 of the EU's General Data Protection Regulation (GDPR), you can notify Adjust when a user has exercised their right to be forgotten. Calling the following method will instruct the Adjust SDK to communicate the user's choice to be forgotten to the Adjust backend:
