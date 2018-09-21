@@ -54,6 +54,7 @@ This is the Xamarin SDK of adjust™. You can read more about adjust™ at [adju
    
 * [Push token (Uninstall/Reinstall tracking)](#push-token)
 * [Attribution callback](#attribution-callback)
+* [User attribution]()
 * [Session and event callbacks](#session-event-callbacks)
 * [Device IDs](#device-ids)
 * [Google Play Services advertising identifier](#di-gps-adid)
@@ -788,6 +789,16 @@ The callback function will be called when the SDK receives final attribution dat
 - `string ClickLabel` the click label of the current attribution.
 - `string Adid` the adjust device identifier.
 
+### <a id="user-attribution"></a>User attribution
+
+As described in the [attribution callback section](#attribution-callback), this callback is triggered and provides you information about new attributions whenever there is a change. If you want to access information about your user's current attribution at any other time, you can access the following property of the `Adjust` instance:
+
+```cs
+AdjustAttribution attribution = Adjust.Attribution;
+```
+
+**Note**: Information about current attribution is available after app installation has been tracked by the adjust backend and attribution callback has been triggered. From that moment on, the adjust SDK has information about a user's attribution and you can access it with this method. So, **it is not possible** to access a user's attribution value before the SDK has been initialised and attribution callback has been triggered.
+
 ### <a id="session-event-callbacks"></a>Session and event callbacks
 
 You can register a callback to be notified of successful and failed events and/or sessions. Like with attribution callback, this should be done in your custom class which implements corresponding interface for each callback method.
@@ -919,8 +930,6 @@ And both event and session failed objects also contain:
 
 You can check if the adjust SDK is currently enabled by checking the `Enabled` property. It is always possible to activate the adjust SDK by invoking `Enabled` with the enabled parameter as `true`.
 
-
-
 ### <a id="device-ids"></a>Device IDs
 
 The adjust SDK offers you possibility to obtain some of the device identifiers.
@@ -979,16 +988,6 @@ String adid = Adjust.Adid;
 ```
 
 **Note**: Information about **adid** is available after app installation has been tracked by the adjust backend. From that moment on, the adjust SDK has information about the device **adid** and you can access it with this method. So, **it is not possible** to access the **adid** value before the SDK has been initialised and installation of your app has been successfully tracked.
-
-### <a id="user-attribution"></a>User attribution
-
-As described in the [attribution callback section](#attribution-callback), this callback is triggered and provides you information about new attributions whenever there is a change. If you want to access information about your user's current attribution at any other time, you can access the following property of the `Adjust` instance:
-
-```cs
-AdjustAttribution attribution = Adjust.Attribution;
-```
-
-**Note**: Information about current attribution is available after app installation has been tracked by the adjust backend and attribution callback has been triggered. From that moment on, the adjust SDK has information about a user's attribution and you can access it with this method. So, **it is not possible** to access a user's attribution value before the SDK has been initialised and attribution callback has been triggered.
 
 ### <a id="track-additional-ids"></a>Track additional device identifiers
 
