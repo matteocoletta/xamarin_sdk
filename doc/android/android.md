@@ -54,7 +54,7 @@ This is the Xamarin SDK of adjust™. You can read more about adjust™ at [adju
    
 * [Push token (Uninstall/Reinstall tracking)](#push-token)
 * [Attribution callback](#attribution-callback)
-* [User attribution]()
+* [User attribution](#user-attribution)
 * [Session and event callbacks](#session-event-callbacks)
 * [Device IDs](#device-ids)
 * [Google Play Services advertising identifier](#di-gps-adid)
