@@ -388,11 +388,163 @@ Build and run your app. If the build succeeds, you should carefully read the SDK
 
 ![][run]
 
-## <a id="additional-features"></a>Additional features
+## <a id="deeplinking"></a>Deep linking
+
+If you are using the adjust tracker URL with an option to deep link into your app from the URL, there is the possibility to get information about the deep link URL and its content. Hitting the URL can happen when the user already has your app installed (standard deep linking scenario) or if they do not have the app on their device (deferred deep linking scenario). In the standard deep linking scenario, the Android platform offers native support for you to get the info about the deep link content. The deferred deep linking scenario is something that the Android platform does not support out of the box. In this scenario, the adjust SDK will offer you the tools you need to get the information about the deep link content.
+
+### <a id="deeplinking-standard"></a>Standard deep linking scenario
+
+If a user has your app installed and you want it to launch after hitting an adjust tracker URL with the `deep_link` parameter in it, you need enable deep linking in your app. This is done by choosing a desired **unique scheme name** and assigning it to the Activity which you want to launch once the app opens after the user has clicked on the link. This can be done by setting certain properties on the Activity class which you would like to see launched once the deep link has been clicked and your app has opened. You need to set up a proper intent filter and name the scheme:
+
+```cs
+[Activity(Label = "Example", MainLauncher = true)]
+	[IntentFilter
+	 (new[] { Intent.ActionView },
+		Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable },
+		DataScheme = "adjustExample")]
+	public class MainActivity : Activity
+	{
+	    // ...
+	}
+```
+
+With this now set, you need to use the assigned scheme name in the adjust tracker URL's `deep_link` parameter. A tracker URL without any information added to the deep link can be built to look something like this:
+
+```
+https://app.adjust.com/abc123?deep_link=adjustExample%3A%2F%2F
+```
+
+Please, have in mind that the `deep_link` parameter value in the URL **must be URL encoded**.
+
+After clicking this tracker URL, and with the app set as described above, your app will launch along with the `MainActivity` intent. Inside the `MainActivity` class, you will automatically be provided with the information about the `deep_link` parameter content. Once this content is delivered to you, it **will not be encoded**, although it was encoded in the URL.
+
+Depending on the `launchMode` setting of your Activity, information about the `deep_link` parameter content will be delivered to the appropriate place in the Activity file. For more information about the possible values of the `launchMode` property, check [the official Android documentation][android-launch-modes].
+
+There are two possible places in which information about the deep link content will be delivered to your desired Activity via `Intent` object - either in the Activity's `OnCreate` or `OnNewIntent` method. After the app has launched and one of these methods is triggered, you will be able to get the actual deeplink passed in the `deep_link` parameter in the click URL. You can then use this information to do some additional logic in your app.
+
+You can extract the deep link content from these two methods like this:
+
+```cs
+using Android.Content;
+using Com.Adjust.Sdk;
+
+// ...
+
+protected override void OnCreate(Bundle savedInstanceState)
+{
+    base.OnCreate(savedInstanceState);
+
+    Intent intent = this.Intent;
+    var data = intent.Data;
+
+    // data.ToString() -> This is your deep_link parameter value.
+}
+```
+
+```cs
+using Android.Content;
+using Com.Adjust.Sdk;
+
+// ...
+
+protected override void OnNewIntent(Android.Content.Intent intent)
+{
+    base.OnNewIntent(intent);
+
+    var data = intent.Data;
+
+    // data.ToString() -> This is your deep_link parameter value.
+}
+```
+
+### <a id="deeplinking-deferred"></a>Deferred deep linking scenario
+
+Deferred deep linking scenario happens when a user clicks on the adjust tracker URL with the `deep_link` parameter in it, but does not have the app installed on the device at the moment of click. After that, the user will get redirected to the Play Store to download and install your app. After opening it for the first time, the content of the `deep_link` parameter will be delivered to the app.
+
+In order to get info about the `deep_link` parameter content in a deferred deep linking scenario, you should set a listener method on the `AdjustConfig` object. Listener object needs to implement `IOnDeeplinkResponseListener` interface and override it's `LaunchReceivedDeeplink` method. This will get triggered once the adjust SDK gets the info about the deep link content from the backend.
+
+```cs
+[Application(AllowBackup = true)]
+public class GlobalApplication : Application, IOnDeeplinkResponseListener
+{
+    public override void OnCreate()
+    {
+        base.OnCreate();
+
+        string appToken = "{YourAppToken}";
+        string environment = AdjustConfig.EnvironmentSandbox;
+        AdjustConfig config = new AdjustConfig(this, appToken, environment);
+
+        // Set deferred deeplink callback.
+        config.SetOnDeeplinkResponseListener(this);
+
+        Adjust.OnCreate(config);
+    }
+
+    public bool LaunchReceivedDeeplink(Android.Net.Uri deeplink)
+    {
+        Console.WriteLine("Deferred deeplink arrived! URL = " + deeplink.ToString());
+
+        return true;
+        // return false;
+    }
+}
+```
+
+Once the adjust SDK receives the info about the deep link content from the backend, it will deliver you the info about its content in this listener and expect the `bool` return value from you. This return value represents your decision on whether the adjust SDK should launch the Activity to which you have assigned the scheme name from the deep link (like in the standard deep linking scenario) or not.
+
+If you return `true`, we will launch it and the exact same scenario which is described in the [Standard deep linking scenario chapter](#deeplinking-standard) will happen. If you do not want the SDK to launch the Activity, you can return `false` from this listener and based on the deep link content decide on your own what to do next in your app.
+
+### <a id="deeplinking-reattribution"></a>Reattribution via deep links
+
+Adjust enables you to run re-engagement campaigns with usage of deep links. For more information on how to do that, please check our [official docs][reattribution-with-deeplinks].
+
+If you are using this feature, in order for your user to be properly reattributed, you need to make one additional call to the adjust SDK in your app.
+
+Once you have received deep link content information in your app, add a call to `Adjust.AppWillOpenUrl` method. By making this call, the adjust SDK will try to find if there is any new attribution info inside of the deep link and if any, it will be sent to the adjust backend. If your user should be reattributed due to a click on the adjust tracker URL with deep link content in it, you will see the [attribution callback](#attribution-callback) in your app being triggered with new attribution info for this user.
+
+The call to `Adjust.AppWillOpenUrl` should be done like this:
+
+```cs
+using Android.Content;
+using Com.Adjust.Sdk;
+
+// ...
+
+protected override void OnCreate(Bundle savedInstanceState)
+{
+    base.OnCreate(savedInstanceState);
+
+    Intent intent = this.Intent;
+    var data = intent.Data;
+
+    // data.ToString() -> This is your deep_link parameter value.
+
+    Adjust.AppWillOpenUrl(data);
+}
+```
+
+```cs
+using Android.Content;
+using Com.Adjust.Sdk;
+
+// ...
+
+protected override void OnNewIntent(Android.Content.Intent intent)
+{
+    base.OnNewIntent(intent);
+
+    var data = intent.Data;
+
+    // data.ToString() -> This is your deep_link parameter value.
+
+    Adjust.AppWillOpenUrl(data);
+}
+```
 
 Once you integrate the adjust SDK into your app, you can take advantage of the following features.
 
-### <a id="event-tracking"></a>Event tracking
+## <a id="event-tracking"></a>Event tracking
 
 You can use adjust to track events. Lets say you want to track every tap on a particular button. You would create a new event token in your [dashboard], which has an associated event token - looking something like `abc123`. In your button's `Click` handler you would then add the following lines to track the tap:
 
@@ -440,6 +592,14 @@ Adjust.TrackEvent(adjustEvent);
 ### <a id="iap-verification"></a>In-App Purchase verification
 
 In-App purchase verification can be done with Xamarin purchase SDK which is currently being developed and will soon be publicly available. For more information, please contact support@adjust.com.
+
+## Custom Parameters
+
+### <a id="event-parameters"></a>Event parameters
+
+In addition to the data points that Adjust collects [by default](https://partners.adjust.com/placeholders/), you can use the Adjust SDK to track and add to the events as many custom values as you need (user IDs, product IDs...). Custom parameters are only available as raw data (i.e., they won't appear in the Adjust dashboard).
+
+You should use Callback parameters for the values that you collect for your own internal use, and Partner parameters for those that you wish to share with external partners. If a value (e.g. product ID) is tracked both for internal use and to forward it to external partners, the best practice would be to track it both as callback and partner parameter.
 
 ### <a id="callback-parameters"></a>Callback parameters
 
@@ -552,6 +712,10 @@ config.SetDelayStart(5.5);
 In this case, this will make the adjust SDK not send the initial install session and any event created for 5.5 seconds. After this time is expired or if you call `Adjust.SendFirstPackages()` in the meanwhile, every session parameter will be added to the delayed install session and events and the adjust SDK will resume as usual.
 
 **The maximum delay start time of the adjust SDK is 10 seconds**.
+
+## Additional Features
+
+Once you have integrated the Adjust SDK into your project, you can take advantage of the following features.
 
 ### <a id="attribution-callback"></a>Attribution callback
 
@@ -913,159 +1077,12 @@ If you want to use the adjust SDK to recognize users that found your app pre-ins
     Default tracker: 'abc123'
     ```
 
-### <a id="deeplinking"></a>Deep linking
-
-If you are using the adjust tracker URL with an option to deep link into your app from the URL, there is the possibility to get information about the deep link URL and its content. Hitting the URL can happen when the user already has your app installed (standard deep linking scenario) or if they do not have the app on their device (deferred deep linking scenario). In the standard deep linking scenario, the Android platform offers native support for you to get the info about the deep link content. The deferred deep linking scenario is something that the Android platform does not support out of the box. In this scenario, the adjust SDK will offer you the tools you need to get the information about the deep link content.
-
-### <a id="deeplinking-standard"></a>Standard deep linking scenario
-
-If a user has your app installed and you want it to launch after hitting an adjust tracker URL with the `deep_link` parameter in it, you need enable deep linking in your app. This is done by choosing a desired **unique scheme name** and assigning it to the Activity which you want to launch once the app opens after the user has clicked on the link. This can be done by setting certain properties on the Activity class which you would like to see launched once the deep link has been clicked and your app has opened. You need to set up a proper intent filter and name the scheme:
-
-```cs
-[Activity(Label = "Example", MainLauncher = true)]
-	[IntentFilter
-	 (new[] { Intent.ActionView },
-		Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable },
-		DataScheme = "adjustExample")]
-	public class MainActivity : Activity
-	{
-	    // ...
-	}
+### <a id="gdpr-forget-me"></a>GDPR right to be forgotten
+ In accordance with article 17 of the EU's General Data Protection Regulation (GDPR), you can notify Adjust when a user has exercised their right to be forgotten. Calling the following method will instruct the Adjust SDK to communicate the user's choice to be forgotten to the Adjust backend:
+ ```cs
+Adjust.gdprForgetMe(this);
 ```
-
-With this now set, you need to use the assigned scheme name in the adjust tracker URL's `deep_link` parameter. A tracker URL without any information added to the deep link can be built to look something like this:
-
-```
-https://app.adjust.com/abc123?deep_link=adjustExample%3A%2F%2F
-```
-
-Please, have in mind that the `deep_link` parameter value in the URL **must be URL encoded**.
-
-After clicking this tracker URL, and with the app set as described above, your app will launch along with the `MainActivity` intent. Inside the `MainActivity` class, you will automatically be provided with the information about the `deep_link` parameter content. Once this content is delivered to you, it **will not be encoded**, although it was encoded in the URL.
-
-Depending on the `launchMode` setting of your Activity, information about the `deep_link` parameter content will be delivered to the appropriate place in the Activity file. For more information about the possible values of the `launchMode` property, check [the official Android documentation][android-launch-modes].
-
-There are two possible places in which information about the deep link content will be delivered to your desired Activity via `Intent` object - either in the Activity's `OnCreate` or `OnNewIntent` method. After the app has launched and one of these methods is triggered, you will be able to get the actual deeplink passed in the `deep_link` parameter in the click URL. You can then use this information to do some additional logic in your app.
-
-You can extract the deep link content from these two methods like this:
-
-```cs
-using Android.Content;
-using Com.Adjust.Sdk;
-
-// ...
-
-protected override void OnCreate(Bundle savedInstanceState)
-{
-    base.OnCreate(savedInstanceState);
-
-    Intent intent = this.Intent;
-    var data = intent.Data;
-
-    // data.ToString() -> This is your deep_link parameter value.
-}
-```
-
-```cs
-using Android.Content;
-using Com.Adjust.Sdk;
-
-// ...
-
-protected override void OnNewIntent(Android.Content.Intent intent)
-{
-    base.OnNewIntent(intent);
-
-    var data = intent.Data;
-
-    // data.ToString() -> This is your deep_link parameter value.
-}
-```
-
-### <a id="deeplinking-deferred"></a>Deferred deep linking scenario
-
-Deferred deep linking scenario happens when a user clicks on the adjust tracker URL with the `deep_link` parameter in it, but does not have the app installed on the device at the moment of click. After that, the user will get redirected to the Play Store to download and install your app. After opening it for the first time, the content of the `deep_link` parameter will be delivered to the app.
-
-In order to get info about the `deep_link` parameter content in a deferred deep linking scenario, you should set a listener method on the `AdjustConfig` object. Listener object needs to implement `IOnDeeplinkResponseListener` interface and override it's `LaunchReceivedDeeplink` method. This will get triggered once the adjust SDK gets the info about the deep link content from the backend.
-
-```cs
-[Application(AllowBackup = true)]
-public class GlobalApplication : Application, IOnDeeplinkResponseListener
-{
-    public override void OnCreate()
-    {
-        base.OnCreate();
-
-        string appToken = "{YourAppToken}";
-        string environment = AdjustConfig.EnvironmentSandbox;
-        AdjustConfig config = new AdjustConfig(this, appToken, environment);
-
-        // Set deferred deeplink callback.
-        config.SetOnDeeplinkResponseListener(this);
-
-        Adjust.OnCreate(config);
-    }
-
-    public bool LaunchReceivedDeeplink(Android.Net.Uri deeplink)
-    {
-        Console.WriteLine("Deferred deeplink arrived! URL = " + deeplink.ToString());
-
-        return true;
-        // return false;
-    }
-}
-```
-
-Once the adjust SDK receives the info about the deep link content from the backend, it will deliver you the info about its content in this listener and expect the `bool` return value from you. This return value represents your decision on whether the adjust SDK should launch the Activity to which you have assigned the scheme name from the deep link (like in the standard deep linking scenario) or not.
-
-If you return `true`, we will launch it and the exact same scenario which is described in the [Standard deep linking scenario chapter](#deeplinking-standard) will happen. If you do not want the SDK to launch the Activity, you can return `false` from this listener and based on the deep link content decide on your own what to do next in your app.
-
-### <a id="deeplinking-reattribution"></a>Reattribution via deep links
-
-Adjust enables you to run re-engagement campaigns with usage of deep links. For more information on how to do that, please check our [official docs][reattribution-with-deeplinks].
-
-If you are using this feature, in order for your user to be properly reattributed, you need to make one additional call to the adjust SDK in your app.
-
-Once you have received deep link content information in your app, add a call to `Adjust.AppWillOpenUrl` method. By making this call, the adjust SDK will try to find if there is any new attribution info inside of the deep link and if any, it will be sent to the adjust backend. If your user should be reattributed due to a click on the adjust tracker URL with deep link content in it, you will see the [attribution callback](#attribution-callback) in your app being triggered with new attribution info for this user.
-
-The call to `Adjust.AppWillOpenUrl` should be done like this:
-
-```cs
-using Android.Content;
-using Com.Adjust.Sdk;
-
-// ...
-
-protected override void OnCreate(Bundle savedInstanceState)
-{
-    base.OnCreate(savedInstanceState);
-
-    Intent intent = this.Intent;
-    var data = intent.Data;
-
-    // data.ToString() -> This is your deep_link parameter value.
-
-    Adjust.AppWillOpenUrl(data);
-}
-```
-
-```cs
-using Android.Content;
-using Com.Adjust.Sdk;
-
-// ...
-
-protected override void OnNewIntent(Android.Content.Intent intent)
-{
-    base.OnNewIntent(intent);
-
-    var data = intent.Data;
-
-    // data.ToString() -> This is your deep_link parameter value.
-
-    Adjust.AppWillOpenUrl(data);
-}
-```
+ Upon receiving this information, Adjust will erase the user's data and the Adjust SDK will stop tracking the user. No requests from this device will be sent to Adjust in the future.
 
 [dashboard]:	http://adjust.com
 [adjust.com]:	http://adjust.com
