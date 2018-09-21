@@ -52,7 +52,7 @@ This is the Xamarin SDK of adjust™. You can read more about adjust™ at [adju
 
 ### Additional Features
    
-* [Push token](#push-token)
+* [Push token (Uninstall/Reinstall tracking)](#push-token)
 * [Attribution callback](#attribution-callback)
 * [Session and event callbacks](#session-event-callbacks)
 * [Device IDs](#device-ids)
@@ -380,6 +380,21 @@ AdjustConfig config = new AdjustConfig(this, appToken, environment, true);
 config.SetLogLevel(LogLevel.Supress);
 
 Adjust.OnCreate(config);
+```
+### <a id="sdk-signature"></a>SDK signature
+
+An account manager must activate the Adjust SDK signature. Contact Adjust support (support@adjust.com) if you are interested in using this feature.
+
+If the SDK signature has already been enabled on your account and you have access to App Secrets in your Adjust Dashboard, please use the method below to integrate the SDK signature into your app.
+
+An App Secret is set by passing all secret parameters (`secretId`, `info1`, `info2`, `info3`, `info4`) to `setAppSecret` method of `AdjustConfig` instance:
+
+```csharp
+AdjustConfig adjustConfig = AdjustConfig(this, appToken, environment);
+
+adjustConfig.SetAppSecret(secretId, info1, info2, info3, info4);
+
+Adjust.OnCreate(adjustConfig);
 ```
 
 ### <a id="build-your-app"></a>Build your app
@@ -890,30 +905,6 @@ And both event and session failed objects also contain:
 
 - `bool WillRetry` indicates there will be an attempt to resend the package at a later time.
 
-### <a id="disable-tracking"></a>Disable tracking
-
-You can disable the adjust SDK from tracking any activities of the current device by assigning parameter `false` to `Enabled` property. **This setting is remembered between sessions**, but it can only be activated after the first session.
-
-```cs
-Adjust.Enabled = false;
-```
-
-You can check if the adjust SDK is currently enabled by checking the `Enabled` property. It is always possible to activate the adjust SDK by invoking `Enabled` with the enabled parameter as `true`.
-
-### <a id="offline-mode"></a>Offline mode
-
-You can put the adjust SDK in offline mode to suspend transmission to our servers, while still retaining tracked data to be sent later. While in offline mode, all information is saved in a file, so be careful to avoid triggering too many events while in offline mode.
-
-You can activate offline mode by calling method `SetOfflineMode` with parameter `true`:
-
-```cs
-Adjust.SetOfflineMode (true);
-```
-
-Conversely, you can deactivate offline mode calling `SetOfflineMode` method with parameter `false`. When the adjust SDK is put back in online mode, all saved information is send to our servers with the correct time information.
-
-Unlike disabling tracking, **this setting is not remembered** between sessions. This means that the SDK is in online mode whenever it is started, even if the app was terminated in offline mode.
-
 ### <a id="event-buffering"></a>Event buffering
 
 If your app makes heavy use of event tracking, then you might want to delay some HTTP requests in order to send them in a single batch per minute.
@@ -930,21 +921,29 @@ Adjust.OnCreate(config);
 
 If nothing is set, event buffering is **disabled by default**.
 
-### <a id="sdk-signature"></a>SDK signature
+### <a id="offline-mode"></a>Offline mode
 
-An account manager must activate the Adjust SDK signature. Contact Adjust support (support@adjust.com) if you are interested in using this feature.
+You can put the adjust SDK in offline mode to suspend transmission to our servers, while still retaining tracked data to be sent later. While in offline mode, all information is saved in a file, so be careful to avoid triggering too many events while in offline mode.
 
-If the SDK signature has already been enabled on your account and you have access to App Secrets in your Adjust Dashboard, please use the method below to integrate the SDK signature into your app.
+You can activate offline mode by calling method `SetOfflineMode` with parameter `true`:
 
-An App Secret is set by passing all secret parameters (`secretId`, `info1`, `info2`, `info3`, `info4`) to `setAppSecret` method of `AdjustConfig` instance:
-
-```csharp
-AdjustConfig adjustConfig = AdjustConfig(this, appToken, environment);
-
-adjustConfig.SetAppSecret(secretId, info1, info2, info3, info4);
-
-Adjust.OnCreate(adjustConfig);
+```cs
+Adjust.SetOfflineMode (true);
 ```
+
+Conversely, you can deactivate offline mode calling `SetOfflineMode` method with parameter `false`. When the adjust SDK is put back in online mode, all saved information is send to our servers with the correct time information.
+
+Unlike disabling tracking, **this setting is not remembered** between sessions. This means that the SDK is in online mode whenever it is started, even if the app was terminated in offline mode.
+
+### <a id="disable-tracking"></a>Disable tracking
+
+You can disable the adjust SDK from tracking any activities of the current device by assigning parameter `false` to `Enabled` property. **This setting is remembered between sessions**, but it can only be activated after the first session.
+
+```cs
+Adjust.Enabled = false;
+```
+
+You can check if the adjust SDK is currently enabled by checking the `Enabled` property. It is always possible to activate the adjust SDK by invoking `Enabled` with the enabled parameter as `true`.
 
 ### <a id="background-tracking"></a>Background tracking
 
