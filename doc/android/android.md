@@ -59,19 +59,14 @@ This is the Xamarin SDK of adjust™. You can read more about adjust™ at [adju
 * [Google Play Services advertising identifier](#di-gps-adid)
 * [Amazon advertising identifier](#di-fire-adid)
 * [Adjust device identifier](#di-adid)
+* [Track additional device identifiers](#track-additional-ids)
+* [Pre-installed trackers](#pre-installed-trackers)
 * [Event buffering](#event-buffering)
 * [Offline mode](#offline-mode)
 * [Disable tracking](#disable-tracking)
-   
-   
-   
-   
-   
-   
-   * [Track additional device identifiers](#track-additional-ids)
-   * [Pre-installed trackers](#pre-installed-trackers)
-   
-* [License](#license)
+* [GDPR right to be forgotten](#gdpr-forget-me)
+ 
+### [License](#license)
 
 ## <a id="example-apps"></a>Example apps
 
