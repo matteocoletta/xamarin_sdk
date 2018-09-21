@@ -506,15 +506,15 @@ In this case this will make the adjust SDK not send the initial install session 
 
 ### <a id="push-token"></a>Push token (Uninstall/Reinstall tracking)
 
-To send us the push notifications token, then add the following call to Adjust **when ever you get your token in the app or when it gets updated**:
+Push tokens are used for Audience Builder and client callbacks, and they are required for uninstall and reinstall tracking.
+
+To send us the push notification token, add the following call to Adjust once you have obtained your token or when ever it's value is changed:
 
 ```cs
-NSData pushNotificationsToken;	// Obtain and assign your push notification token as NSData type.
-
-Adjust.SetDeviceToken(pushNotificationsToken);
+Adjust.SetPushToken("YourPushNotificationsToken");
 ```
 
-Push tokens are used for the Adjust Audience Builder and client callbacks, and are required for the upcoming uninstall tracking feature.
+**Note**: `Adjust.SetDeviceToken(NSData)` method is marked as deprecated as of Android SDK v4.14.0. Please, use `Adjust.SetPushToken(string)` method instead.
 
 ### <a id="attribution-callback"></a>Attribution callback
 
