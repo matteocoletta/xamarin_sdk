@@ -61,8 +61,6 @@ This is the Xamarin SDK of adjust™. You can read more about adjust™ at [adju
    
 ### [License](#license)
 
----
-
 ## <a id="early-steps"></a>Quick Start
 
 
