@@ -53,13 +53,14 @@ This is the Xamarin SDK of adjust™. You can read more about adjust™ at [adju
       * [iOS Advertising Identifier](#di-idfa)
       * [Adjust device identifier](#di-adid)
    * [Pre-installed trackers](#pre-installed-trackers)
-   * [Event buffering](#event-buffering)
    * [Background tracking](#background-tracking)
+   * [Event buffering](#event-buffering)
    * [Offline mode](#offline-mode)
    * [Disable tracking](#disable-tracking)
    * [GDPR right to be forgotten](#gdpr-forget-me)
    
 ### [License](#license)
+
 ---
 
 ## <a id="early-steps"></a>Quick Start
@@ -687,7 +688,19 @@ If you want to use the adjust SDK to recognize users that found your app pre-ins
     ```
     Default tracker: 'abc123'
     ```
-    
+### <a id="background-tracking"></a>Background tracking
+
+The default behaviour of the adjust SDK is to **pause sending HTTP requests while the app is in the background**. You can change this in your `ADJConfig` instance:
+
+```cs
+var config = ADJConfig.ConfigWithAppToken(yourAppToken, environment);
+
+config.SendInBackground = true;
+
+Adjust.AppDidLaunch(config);
+```
+
+If nothing set, sending in background is **disabled by default**.
     
 ### <a id="event-buffering"></a>Event buffering
 
@@ -702,20 +715,6 @@ Adjust.AppDidLaunch(config);
 ```
 
 If nothing is set, event buffering is **disabled by default**.
-
-### <a id="background-tracking"></a>Background tracking
-
-The default behaviour of the adjust SDK is to **pause sending HTTP requests while the app is in the background**. You can change this in your `ADJConfig` instance:
-
-```cs
-var config = ADJConfig.ConfigWithAppToken(yourAppToken, environment);
-
-config.SendInBackground = true;
-
-Adjust.AppDidLaunch(config);
-```
-
-If nothing set, sending in background is **disabled by default**.
 
 ### <a id="offline-mode"></a>Offline mode
 
