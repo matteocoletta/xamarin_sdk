@@ -62,6 +62,7 @@ This is the Xamarin SDK of adjust™. You can read more about adjust™ at [adju
 * [Adjust device identifier](#di-adid)
 * [Track additional device identifiers](#track-additional-ids)
 * [Pre-installed trackers](#pre-installed-trackers)
+* [Background tracking](#background-tracking)
 * [Event buffering](#event-buffering)
 * [Offline mode](#offline-mode)
 * [Disable tracking](#disable-tracking)
@@ -1027,6 +1028,18 @@ If you want to use the adjust SDK to recognize users that found your app pre-ins
     Default tracker: 'abc123'
     ```
 
+### <a id="background-tracking"></a>Background tracking
+
+The default behaviour of the adjust SDK is to **pause sending HTTP requests while the app is in the background**. You can change this in your `AdjustConfig` instance:
+
+```cs
+AdjustConfig config = new AdjustConfig(this, yourAppToken, environment);
+
+config.SetSendInBackground(true);
+
+Adjust.OnCreate(config);
+```
+
 ### <a id="event-buffering"></a>Event buffering
 
 If your app makes heavy use of event tracking, then you might want to delay some HTTP requests in order to send them in a single batch per minute.
@@ -1042,18 +1055,6 @@ Adjust.OnCreate(config);
 ```
 
 If nothing is set, event buffering is **disabled by default**.
-
-### <a id="background-tracking"></a>Background tracking
-
-The default behaviour of the adjust SDK is to **pause sending HTTP requests while the app is in the background**. You can change this in your `AdjustConfig` instance:
-
-```cs
-AdjustConfig config = new AdjustConfig(this, yourAppToken, environment);
-
-config.SetSendInBackground(true);
-
-Adjust.OnCreate(config);
-```
 
 ### <a id="offline-mode"></a>Offline mode
 
