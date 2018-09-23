@@ -70,6 +70,8 @@ This is the Xamarin SDK of adjust™. You can read more about adjust™ at [adju
  
 ### [License](#license)
 
+---
+
 ## <a id="example-apps"></a>Example apps
 
 There is an Android example app inside the [`Android` directory][demo-app-android]. You can open the Xamarin Studio project to see an example of how to integrate the adjust SDK.
